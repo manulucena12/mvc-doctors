@@ -1,10 +1,13 @@
 import express from 'express'
+import 'dotenv/config'
 import { databaseConnection } from './database'
+import authRouter from './routes/auth'
 
-const app = express()
+export const app = express()
 const PORT = process.env.PORT || 3002
 
 app.use(express.json())
+app.use('/auth', authRouter)
 
 export const server = app.listen(PORT, () => {
     databaseConnection()
