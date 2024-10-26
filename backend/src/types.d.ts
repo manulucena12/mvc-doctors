@@ -1,17 +1,21 @@
-import { Response, Request } from "express-serve-static-core"
+import { Response, Request } from "express-serve-static-core";
 
 export interface User {
-    name: string,
-    password: string,
-    email: string,
-    doctor?: boolean,
-    role: 'admin' | 'user' 
+  name: string;
+  password: string;
+  email: string;
+  doctor?: boolean;
+  role?: "admin" | "user";
 }
 
 export interface AuthController {
-    signup(req: Request, res: Response) : Promise<Response>
+  signup(
+    req: Request<NonNullable<unknown>, NonNullable<unknown>, User>,
+    res: Response,
+  ): Promise<Response>;
 }
 
 export interface AuthModel {
-    creteUser(user: User) : Promise<User | string>
+  createUser(user: User): Promise<User | string>;
+  createDoctor(user: User): Promise<User | string>;
 }
