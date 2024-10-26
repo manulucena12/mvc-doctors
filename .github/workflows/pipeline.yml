@@ -1,0 +1,32 @@
+name: Backend
+on: 
+  push:
+    branches: [main]
+
+jobs: 
+  CI_Backend:
+    runs-on: ubuntu-latest
+    container:
+      image: node:20-alpine
+    steps: 
+    - name: Checking out
+      uses: actions/checkout@v4
+      with: 
+        fetch-depth: 0
+    - name: Installing dependencies
+      working-directory: backend
+      run: npm ci
+    - name: Chencking lint
+      working-directory: backend
+      run: npm run lint
+    - name: Typescript build
+      working-directory: backend
+      run: npm run build
+    - name: Cleaning up build for test
+      working-directory: backend
+      run: rm -rf build
+    - name: Run tests
+      working-directory: backend
+      env:
+        DB_TEST: ${{ secrets.DB_TEST }}
+      run: npm run test
