@@ -1,0 +1,21 @@
+
+### Creating an user (when there is no role and doctor user definded, postgres will set 'user' and false automatically) 
+
+POST https://localhost:3002/auth/signup 
+content-type: application/json
+
+{
+    "name": "Manuel Lucena",
+    "email": "manuexample@gmail.com",
+    "password": "ILOVEMVCANDTDD"
+}
+
+### Login with the created user
+
+POST https://localhost:3002/auth/signin
+content-type: application/json
+
+{
+    "email": "manuexample@gmail.com",
+    "password": "ILOVEMVCANDTDD"
+}
