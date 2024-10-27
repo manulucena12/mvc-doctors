@@ -72,7 +72,7 @@ export const testingAuth = () => {
       await api
         .post("/auth/signin")
         .send({
-          email: "firstpatient@gmail.com",
+          name: "firstPatient",
           password: "testing-user-password-1",
         })
         .expect(200)

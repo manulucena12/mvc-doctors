@@ -29,4 +29,5 @@ jobs:
       working-directory: backend
       env:
         DB_TEST: ${{ secrets.DB_TEST }}
+        SECRET_WORD: ${{ secrets.SECRET_WORD }}
       run: npm run test
