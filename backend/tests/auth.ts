@@ -1,11 +1,27 @@
 import bcrypt from "bcryptjs";
 import { api } from "./app.test";
+import { client } from "../src/database";
 
 export const testingAuth = () => {
+  let token: string;
+  beforeAll(async () => {
+    const password = await bcrypt.hash("passwordadmintester", 10);
+    await client.query(
+      `INSERT INTO users (name, email, password, role) VALUES ('AdminTester', 'admintester@gmail.com', $1, 'admin')`,
+      [password],
+    );
+    await api
+      .post("/auth/signin")
+      .send({ email: "admintester@gmail.com", password: "passwordadmintester" })
+      .then((response) => {
+        token = response.body.token;
+      });
+  });
   describe("Testing auth endpoint", () => {
-    it("Creating a user works properly", async () => {
+    it("Creating an user works properly", async () => {
       await api
         .post("/auth/signup")
+        .set("token", token)
         .send({
           name: "firstPatient",
           password: "testing-user-password-1",
@@ -19,6 +35,7 @@ export const testingAuth = () => {
     it("Creating a doctor works properly", async () => {
       await api
         .post("/auth/signup")
+        .set("token", token)
         .send({
           name: "firstDoctor",
           password: "testing-user-password-1",
@@ -30,9 +47,24 @@ export const testingAuth = () => {
           expect(response.body.doctor).toBeTruthy();
         });
     });
+    it("Creating an user without admin authorization return 403", async () => {
+      await api
+        .post("/auth/signup")
+        .send({
+          name: "firstDoctor",
+          password: "testing-user-password-1",
+          email: "firstdoctor@gmail.com",
+          doctor: true,
+        })
+        .expect(403)
+        .then((response) => {
+          expect(response.body).toBe("Unauthorized");
+        });
+    });
     it("Creating a user with an used email causes 400", async () => {
       await api
         .post("/auth/signup")
+        .set("token", token)
         .send({
           name: "firstPatient",
           password: "testing-user-password-1",
@@ -47,6 +79,7 @@ export const testingAuth = () => {
       const password = await bcrypt.hash("testing-user-password-1", 10);
       await api
         .post("/auth/signup")
+        .set("token", token)
         .send({
           name: "firstPatient",
           password,
