@@ -1,4 +1,4 @@
-import { Response, Request } from "express-serve-static-core";
+import { Response, Request, NextFunction } from "express-serve-static-core";
 
 export interface User {
   id?: number;
@@ -14,6 +14,11 @@ export interface Token {
   token: string;
   name: string;
   doctor: boolean;
+}
+
+interface JwtPalyoad {
+  id: number;
+  role: string;
 }
 
 export interface AuthController {
@@ -32,4 +37,9 @@ export interface AuthModel {
   createDoctor(user: User): Promise<User | string>;
   emailLogin(email: string, password: string): Promise<Token | string>;
   nameLogin(name: string, password: string): Promise<Token | string>;
+}
+
+export interface AuthMiddleware {
+  verifyToken(req: Request, res: Response, next: NextFunction): Promise;
+  verifyAdmin(req: Request, res: Response, next: NextFunction): Promise;
 }

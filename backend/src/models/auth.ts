@@ -62,7 +62,10 @@ export const authModel: AuthModel = {
       if (!SECRET_WORD) {
         return "Internal server error";
       }
-      const token = jwt.sign({ id: rows[0].id }, SECRET_WORD);
+      const token = jwt.sign(
+        { id: rows[0].id, role: rows[0].role },
+        SECRET_WORD,
+      );
       return {
         token,
         id: rows[0].id,
@@ -93,7 +96,10 @@ export const authModel: AuthModel = {
       if (!SECRET_WORD) {
         return "Internal server error";
       }
-      const token = jwt.sign({ id: rows[0].id }, SECRET_WORD);
+      const token = jwt.sign(
+        { id: rows[0].id, role: rows[0].role },
+        SECRET_WORD,
+      );
       return {
         token,
         id: rows[0].id,
