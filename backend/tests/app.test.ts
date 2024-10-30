@@ -3,6 +3,7 @@ import { app, server } from "../src";
 import { client } from "../src/database";
 import { testingAuth } from "./auth";
 import { queries } from "../src/database/queries";
+// import { testingAppointments } from "./appointments";
 
 export const api = supertest(app);
 

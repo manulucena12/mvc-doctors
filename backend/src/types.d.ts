@@ -1,5 +1,13 @@
 import { Response, Request, NextFunction } from "express-serve-static-core";
 
+declare global {
+  namespace Express {
+    interface Request {
+      doctorId?: number;
+    }
+  }
+}
+
 export interface User {
   id?: number;
   name: string;
@@ -16,9 +24,18 @@ export interface Token {
   doctor: boolean;
 }
 
-interface JwtPalyoad {
+export interface Appointment {
+  id: number;
+  doctor: number;
+  patient: number;
+  date: string;
+  reason: string;
+}
+
+export interface JwtPalyoad {
   id: number;
   role: string;
+  doctor: boolean;
 }
 
 export interface AuthController {
@@ -42,4 +59,19 @@ export interface AuthModel {
 export interface AuthMiddleware {
   verifyToken(req: Request, res: Response, next: NextFunction): Promise;
   verifyAdmin(req: Request, res: Response, next: NextFunction): Promise;
+  verifyDoctor(req: Request, res: Response, next: NextFunction): Promise;
+}
+
+export interface AppointmentController {
+  createAppointment(req: Request, res: Response): Promise<Response>;
+}
+
+export interface AppointmentModel {
+  createSameTime(
+    x: number,
+    y: number,
+    time: string,
+    day: string,
+    id: number,
+  ): Promise<Appointment[] | string>;
 }

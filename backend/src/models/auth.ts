@@ -63,7 +63,7 @@ export const authModel: AuthModel = {
         return "Internal server error";
       }
       const token = jwt.sign(
-        { id: rows[0].id, role: rows[0].role },
+        { id: rows[0].id, role: rows[0].role, doctor: rows[0].doctor },
         SECRET_WORD,
       );
       return {
@@ -97,7 +97,7 @@ export const authModel: AuthModel = {
         return "Internal server error";
       }
       const token = jwt.sign(
-        { id: rows[0].id, role: rows[0].role },
+        { id: rows[0].id, role: rows[0].role, doctor: rows[0].doctor },
         SECRET_WORD,
       );
       return {
