@@ -3,7 +3,7 @@ import { app, server } from "../src";
 import { client } from "../src/database";
 import { testingAuth } from "./auth";
 import { queries } from "../src/database/queries";
-// import { testingAppointments } from "./appointments";
+import { testingAppointments } from "./appointments";
 
 export const api = supertest(app);
 
@@ -13,8 +13,10 @@ describe("Testing api", () => {
   });
 
   testingAuth();
+  testingAppointments();
 
   afterAll(async () => {
+    await client.query("DELETE FROM appointments");
     await client.query("DELETE FROM users");
     await client.end();
     console.log("Deleted data and ended connection");

@@ -78,7 +78,6 @@ export const authModel: AuthModel = {
     }
   },
   async nameLogin(name, password) {
-    console.log(name);
     try {
       const { rows } = await client.query(
         "SELECT * FROM users WHERE name = $1",

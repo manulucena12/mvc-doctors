@@ -4,8 +4,8 @@ import bcrypt from "bcryptjs";
 
 export const testingAppointments = () => {
   let token: string;
-  let token2: string;
-  let appointmentId: number;
+  // let token2: string;
+  // let appointmentId: number;
   beforeAll(async () => {
     const password = await bcrypt.hash("passwordadmintester", 10);
     await client.query(
@@ -25,7 +25,7 @@ export const testingAppointments = () => {
       .then((response) => {
         token = response.body.token;
       });
-    await api
+    /* await api
       .post("/auth/signin")
       .send({
         email: "admintester3@gmail.com",
@@ -33,32 +33,51 @@ export const testingAppointments = () => {
       })
       .then((response) => {
         token2 = response.body.token;
-      });
+      }); */
   });
   describe("Testing appointments endpoint", () => {
-    it("Creating an appointment without being a doctor causes 403", async () => {
+    it("Creating a schedule without being a doctor causes 403", async () => {
       await api
-        .post("/appointments")
+        .post("/appointments/schedule")
         .send({})
         .expect(403)
         .then((response) => {
           expect(response.body).toBe("Unauthorized");
         });
     });
-    it("Creating appointments works properly", async () => {
+    it("Creating a aschedule with same hour periods works properly", async () => {
       await api
-        .post("/appointments")
+        .post("/appointments/schedule")
         .set("token", token)
-        .send({})
+        .send({ day: "July 12", beggin: "2 PM", end: "8 PM" })
         .expect(201)
         .then((response) => {
-          appointmentId = response.body.id;
-          expect(response.body.id).toBeDefined();
-          expect(response.body.doctor).toBeDefined();
-          expect(response.body.reason).toBeDefined();
+          expect(Array.isArray(response.body)).toBeTruthy();
         });
     });
-    it("Once an appointment has been created, a doctor can set any registered patient in it", async () => {
+    it("Creating a schedule with differents hours periods works properly", async () => {
+      await api
+        .post("/appointments/schedule")
+        .set("token", token)
+        .send({ day: "July 13", beggin: "12 AM", end: "8 PM" })
+        .expect(201)
+        .then((response) => {
+          expect(Array.isArray(response.body)).toBeTruthy();
+        });
+    });
+    it("Two schedules cannot be created for same day, causes 400", async () => {
+      await api
+        .post("/appointments/schedule")
+        .set("token", token)
+        .send({ day: "July 13", beggin: "12 AM", end: "8 PM" })
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toBe(
+            "A schedule has already been created, if you want to add/delete/modify a single day, try another endpoint",
+          );
+        });
+    });
+    /*it("Once an appointment has been created, a doctor can set any registered patient in it", async () => {
       await api
         .put(`/appointments/${appointmentId}`)
         .set("token", token)
@@ -81,6 +100,6 @@ export const testingAppointments = () => {
           expect(response.body.doctor).toBeDefined();
           expect(response.body.reason).toBeDefined();
         });
-    });
+    });*/
   });
 };

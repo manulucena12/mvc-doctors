@@ -38,6 +38,10 @@ export interface JwtPalyoad {
   doctor: boolean;
 }
 
+export interface Utils {
+  getHours(beggin: string, end: string): [number, string, number, string];
+}
+
 export interface AuthController {
   signup(
     req: Request<NonNullable<unknown>, NonNullable<unknown>, User>,
@@ -63,7 +67,7 @@ export interface AuthMiddleware {
 }
 
 export interface AppointmentController {
-  createAppointment(req: Request, res: Response): Promise<Response>;
+  createSchedule(req: Request, res: Response): Promise<Response>;
 }
 
 export interface AppointmentModel {
@@ -71,6 +75,12 @@ export interface AppointmentModel {
     x: number,
     y: number,
     time: string,
+    day: string,
+    id: number,
+  ): Promise<Appointment[] | string>;
+  createDifferentTime(
+    x: number,
+    y: number,
     day: string,
     id: number,
   ): Promise<Appointment[] | string>;

@@ -3,9 +3,9 @@ import { appointmentController } from "../controllers/appointments";
 import { authMiddleware } from "../middlewares/auth";
 
 const appointmentsRouter = Router();
-const { createAppointment } = appointmentController;
+const { createSchedule } = appointmentController;
 const { verifyDoctor } = authMiddleware;
 
-appointmentsRouter.post("/", verifyDoctor, createAppointment);
+appointmentsRouter.post("/schedule", verifyDoctor, createSchedule);
 
 export default appointmentsRouter;
