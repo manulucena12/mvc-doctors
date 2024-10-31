@@ -2,7 +2,8 @@ import { appointmentModel } from "../models/appointments";
 import { AppointmentController } from "../types";
 import { utils } from "../utils";
 
-const { createSameTime, createDifferentTime } = appointmentModel;
+const { createSameTime, createDifferentTime, getAppointment, getAppointments } =
+  appointmentModel;
 const { getHours } = utils;
 
 export const appointmentController: AppointmentController = {
@@ -68,5 +69,39 @@ export const appointmentController: AppointmentController = {
       return res.status(400).json(secondSchedule);
     }
     return res.status(500).json("Internal server error");
+  },
+  async getAppointments(req, res) {
+    const { day } = req.query;
+    if (!day) {
+      return res.status(400).json("Missing data");
+    }
+    if (!req.doctorId) {
+      return res.status(500).json("Internal server error");
+    }
+    const appointments = await getAppointments(day.toString(), req.doctorId);
+    if (appointments === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    } else if (typeof appointments === "string") {
+      return res.status(400).json(appointments);
+    }
+    return res.status(200).json(appointments);
+  },
+  async getSingleAppointment(req, res) {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json("Missing data or invalid type");
+    }
+    if (!req.doctorId) {
+      return res.status(500).json("Internal server error");
+    }
+    const appointment = await getAppointment(id, req.doctorId);
+    if (appointment === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    } else if (typeof appointment === "string") {
+      const status =
+        appointment === "You cannot access this assigment" ? 403 : 400;
+      return res.status(status).json(appointment);
+    }
+    return res.status(200).json(appointment);
   },
 };

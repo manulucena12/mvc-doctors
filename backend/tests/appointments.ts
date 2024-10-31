@@ -4,8 +4,8 @@ import bcrypt from "bcryptjs";
 
 export const testingAppointments = () => {
   let token: string;
-  // let token2: string;
-  // let appointmentId: number;
+  let token2: string;
+  let appointmentId: number;
   beforeAll(async () => {
     const password = await bcrypt.hash("passwordadmintester", 10);
     await client.query(
@@ -25,7 +25,7 @@ export const testingAppointments = () => {
       .then((response) => {
         token = response.body.token;
       });
-    /* await api
+    await api
       .post("/auth/signin")
       .send({
         email: "admintester3@gmail.com",
@@ -33,7 +33,7 @@ export const testingAppointments = () => {
       })
       .then((response) => {
         token2 = response.body.token;
-      }); */
+      });
   });
   describe("Testing appointments endpoint", () => {
     it("Creating a schedule without being a doctor causes 403", async () => {
@@ -75,6 +75,37 @@ export const testingAppointments = () => {
           expect(response.body).toBe(
             "A schedule has already been created, if you want to add/delete/modify a single day, try another endpoint",
           );
+        });
+    });
+    it("A doctor who did not create the appointment cannot access to it, causes 403", async () => {
+      const { rows } = await client.query(
+        "SELECT * FROM appointments WHERE date ILIKE $1",
+        ["July 13%"],
+      );
+      appointmentId = rows[0].id;
+      await api
+        .get(`/appointments/${appointmentId}`)
+        .set("token", token2)
+        .expect(403);
+    });
+    it("Getting an appointment works properly", async () => {
+      await api
+        .get(`/appointments/${appointmentId}`)
+        .set("token", token)
+        .expect(200)
+        .then((response) => {
+          expect(response.body.id).toBeDefined();
+          expect(response.body.doctor).toBeDefined();
+          expect(response.body.date).toBeDefined();
+        });
+    });
+    it("Getting appointments of a day using doctor token works properly", async () => {
+      await api
+        .get("/appointments/?day=July 12")
+        .set("token", token)
+        .expect(200)
+        .then((response) => {
+          expect(Array.isArray(response.body)).toBeTruthy();
         });
     });
     /*it("Once an appointment has been created, a doctor can set any registered patient in it", async () => {

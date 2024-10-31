@@ -67,4 +67,37 @@ export const appointmentModel: AppointmentModel = {
       return "Internal server error";
     }
   },
+  async getAppointments(day, doctorId) {
+    try {
+      const { rows } = await client.query(
+        "SELECT * FROM appointments WHERE doctor = $1 AND date ILIKE $2",
+        [doctorId, `${day}%`],
+      );
+      if (rows.length === 0) {
+        return "Appointments not found";
+      }
+      return rows;
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
+  async getAppointment(appointmentId, doctorId) {
+    try {
+      const { rows } = await client.query(
+        "SELECT * FROM appointments WHERE id = $1",
+        [appointmentId],
+      );
+      if (rows.length === 0) {
+        return "Appointment not found";
+      }
+      if (rows[0].doctor !== doctorId) {
+        return "You cannot access this assigment";
+      }
+      return rows[0];
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
 };

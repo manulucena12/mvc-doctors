@@ -68,6 +68,8 @@ export interface AuthMiddleware {
 
 export interface AppointmentController {
   createSchedule(req: Request, res: Response): Promise<Response>;
+  getAppointments(req: Request, res: Response): Promise<Response>;
+  getSingleAppointment(req: Request, res: Response): Promise<Response>;
 }
 
 export interface AppointmentModel {
@@ -84,4 +86,12 @@ export interface AppointmentModel {
     day: string,
     id: number,
   ): Promise<Appointment[] | string>;
+  getAppointments(
+    day: string,
+    doctorId: number,
+  ): Promise<Appointment[] | string>;
+  getAppointment(
+    appointmentId: string,
+    doctorId: number,
+  ): Promise<Appointment | string>;
 }
