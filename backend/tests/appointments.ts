@@ -5,17 +5,21 @@ import bcrypt from "bcryptjs";
 export const testingAppointments = () => {
   let token: string;
   let token2: string;
+  let id: number;
+  let id2: number;
   let appointmentId: number;
   beforeAll(async () => {
     const password = await bcrypt.hash("passwordadmintester", 10);
-    await client.query(
-      `INSERT INTO users (name, email, password, doctor) VALUES ('AdminTester2', 'admintester2@gmail.com', $1, true)`,
+    const { rows } = await client.query(
+      `INSERT INTO users (name, email, password, doctor) VALUES ('AdminTester2', 'admintester2@gmail.com', $1, true)  RETURNING id`,
       [password],
     );
-    await client.query(
-      `INSERT INTO users (name, email, password, doctor) VALUES ('AdminTester3', 'admintester3@gmail.com', $1, true)`,
+    const { rows: rows2 } = await client.query(
+      `INSERT INTO users (name, email, password, doctor) VALUES ('AdminTester3', 'admintester3@gmail.com', $1, true) RETURNING id`,
       [password],
     );
+    id = rows[0].id;
+    id2 = rows2[0].id;
     await api
       .post("/auth/signin")
       .send({
@@ -108,12 +112,12 @@ export const testingAppointments = () => {
           expect(Array.isArray(response.body)).toBeTruthy();
         });
     });
-    /*it("Once an appointment has been created, a doctor can set any registered patient in it", async () => {
+    it("Once an appointment has been created, a doctor can set any registered patient in it", async () => {
       await api
         .put(`/appointments/${appointmentId}`)
         .set("token", token)
-        .send({})
-        .expect(201)
+        .send({ reason: "Heart attack", patient: id2 })
+        .expect(200)
         .then((response) => {
           expect(response.body.id).toBeDefined();
           expect(response.body.doctor).toBeDefined();
@@ -124,13 +128,45 @@ export const testingAppointments = () => {
       await api
         .put(`/appointments/${appointmentId}`)
         .set("token", token2)
-        .send({})
-        .expect(201)
+        .send({ reason: "Heart attack", patient: id })
+        .expect(403)
         .then((response) => {
-          expect(response.body.id).toBeDefined();
-          expect(response.body.doctor).toBeDefined();
-          expect(response.body.reason).toBeDefined();
+          expect(response.body).toBe("You cannot modify this appointment");
         });
-    });*/
+    });
+    it("A doctor cannot set an appointments with himself", async () => {
+      await api
+        .put(`/appointments/${appointmentId}`)
+        .set("token", token)
+        .send({ reason: "Heart attack", patient: id })
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toBe(
+            "You cannot have an appointment with yourself",
+          );
+        });
+    });
+    it("Setting an appointment with a non-existing patient causes 400", async () => {
+      await api
+        .put(`/appointments/${appointmentId}`)
+        .set("token", token)
+        .send({ reason: "Heart attack", patient: 99999 })
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toBe(
+            "You cannot assign a patient that does not exist to an appointment",
+          );
+        });
+    });
+    it("Modifying an appointment that not exists causes 400", async () => {
+      await api
+        .put(`/appointments/99999`)
+        .set("token", token)
+        .send({ reason: "Heart attack", patient: id2 })
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toBe("Appoinment not found");
+        });
+    });
   });
 };

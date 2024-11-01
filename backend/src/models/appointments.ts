@@ -100,4 +100,33 @@ export const appointmentModel: AppointmentModel = {
       return "Internal server error";
     }
   },
+  async setAppointment(appointmentId, doctorId, patientId, reason) {
+    try {
+      const { rows } = await client.query(
+        "SELECT * FROM appointments WHERE id = $1",
+        [appointmentId],
+      );
+      if (rows.length === 0) {
+        return "Appoinment not found";
+      }
+      if (rows[0].doctor !== doctorId) {
+        return "You cannot modify this appointment";
+      }
+      const { rows: users } = await client.query(
+        "SELECT * FROM users WHERE id = $1",
+        [patientId],
+      );
+      if (users.length === 0) {
+        return "You cannot assign a patient that does not exist to an appointment";
+      }
+      const { rows: appointment } = await client.query(
+        "UPDATE appointments SET reason = $1, patient = $2 WHERE id = $3 RETURNING *",
+        [reason, patientId, appointmentId],
+      );
+      return appointment[0];
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
 };
