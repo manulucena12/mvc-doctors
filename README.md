@@ -4,7 +4,7 @@
 
 ## Project Description
 
-This is a backend project that can be extended with a frontend. It leverages TypeScript for type safety and includes other key technologies, such as JSON Web Tokens (JWT) for managing authentication, PostgreSQL for data storage, and the Model-View-Controller (MVC) design pattern to structure the endpoints. The entire project is built with a focus on Test-Driven Development (TDD), ensuring reliable backend behavior and optimal performance.
+This is a backend project that can be extended with a frontend. It leverages TypeScript for type safety and includes other key technologies, such as JSON Web Tokens (JWT) for managing authentication, PostgreSQL for data storage, Nodemailer to let the patients and doctors know if they joined or left the clinic, and the Model-View-Controller (MVC) design pattern to structure the endpoints. The entire project is built with a focus on Test-Driven Development (TDD), ensuring reliable backend behavior and optimal performance.
 
 ## Technologies Used
 
