@@ -9,6 +9,7 @@ const {
   getAppointments,
   setAppointment,
   deleteAppointment,
+  newAppointment,
 } = appointmentModel;
 const { getHours } = utils;
 
@@ -159,5 +160,34 @@ export const appointmentController: AppointmentController = {
       return res.status(status).json(response);
     }
     return res.status(204).end();
+  },
+  async createAppointment(req, res) {
+    const { reason, date, patient } = req.body;
+    if (
+      !reason ||
+      !date ||
+      !patient ||
+      typeof patient !== "number" ||
+      typeof reason !== "string" ||
+      typeof date !== "string"
+    ) {
+      return res.status(400).json("Missing data or invalid types");
+    }
+    if (!req.doctorId) {
+      return res.status(500).json("Internal server error");
+    }
+    const appointment = await newAppointment(
+      reason,
+      req.doctorId,
+      patient,
+      date,
+    );
+    if (appointment === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof appointment === "string") {
+      return res.status(400).json(appointment);
+    }
+    return res.status(201).json(appointment);
   },
 };

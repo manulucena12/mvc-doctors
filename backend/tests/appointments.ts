@@ -197,5 +197,36 @@ export const testingAppointments = () => {
           );
         });
     });
+    it("Creating a single appointment works properly", async () => {
+      await api
+        .post(`/appointments`)
+        .set("token", token)
+        .send({
+          reason: "Stomach pain",
+          patient: id2,
+          date: "July 14, 1PM - 2PM",
+        })
+        .expect(201)
+        .then((response) => {
+          expect(response.body.id).toBeDefined();
+          expect(response.body.reason).toBeDefined();
+        });
+    });
+    it("Creating an appointment in a taken date causes 400", async () => {
+      await api
+        .post(`/appointments`)
+        .set("token", token)
+        .send({
+          reason: "Stomach pain",
+          patient: id2,
+          date: "July 14, 1PM - 2PM",
+        })
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toBe(
+            "There is already an appointment asigned to this date, try another",
+          );
+        });
+    });
   });
 };

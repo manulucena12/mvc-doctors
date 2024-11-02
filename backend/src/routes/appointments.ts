@@ -9,10 +9,13 @@ const {
   getAppointments,
   putPatient,
   cancelAppointment,
+  createAppointment,
 } = appointmentController;
 const { verifyDoctor } = authMiddleware;
 
 appointmentsRouter.post("/schedule", verifyDoctor, createSchedule);
+
+appointmentsRouter.post("/", verifyDoctor, createAppointment);
 
 appointmentsRouter.get("/:id", verifyDoctor, getSingleAppointment);
 

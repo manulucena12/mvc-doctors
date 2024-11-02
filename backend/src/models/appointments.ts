@@ -150,4 +150,23 @@ export const appointmentModel: AppointmentModel = {
       return "Internal server error";
     }
   },
+  async newAppointment(reason, doctorId, patientId, date) {
+    try {
+      const { rows: dates } = await client.query(
+        "SELECT FROM appointments WHERE doctor = $1 AND date = $2",
+        [doctorId, date],
+      );
+      if (dates.length !== 0) {
+        return "There is already an appointment asigned to this date, try another";
+      }
+      const { rows } = await client.query(
+        "INSERT INTO appointments (reason, patient, doctor, date) VALUES ($1, $2, $3, $4) RETURNING *",
+        [reason, patientId, doctorId, date],
+      );
+      return rows[0];
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
 };

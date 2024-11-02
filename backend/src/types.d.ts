@@ -72,6 +72,7 @@ export interface AppointmentController {
   getSingleAppointment(req: Request, res: Response): Promise<Response>;
   putPatient(req: Request, res: Response): Promise<Response>;
   cancelAppointment(req: Request, res: Response): Promise<Response>;
+  createAppointment(req: Request, res: Response): Promise<Response>;
 }
 
 export interface AppointmentModel {
@@ -106,4 +107,10 @@ export interface AppointmentModel {
     appointmentId: string,
     doctorId: number,
   ): Promise<null | string>;
+  newAppointment(
+    reason: string,
+    doctorId: number,
+    patientId: number,
+    date: string,
+  ): Promise<Appointment | string>;
 }
