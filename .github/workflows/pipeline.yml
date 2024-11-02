@@ -30,4 +30,6 @@ jobs:
       env:
         DB_TEST: ${{ secrets.DB_TEST }}
         SECRET_WORD: ${{ secrets.SECRET_WORD }}
+        GOOGLE_PASSWORD: ${{ secrets.GOOGLE_PASSWORD }}
+        CREATOR_GMAIL: ${{ secrets.CREATOR_GMAIL }}
       run: npm run test
