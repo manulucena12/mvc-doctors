@@ -168,5 +168,34 @@ export const testingAppointments = () => {
           expect(response.body).toBe("Appoinment not found");
         });
     });
+    it("Only the doctor who create the appointment can delete it", async () => {
+      await api
+        .delete(`/appointments/${appointmentId}`)
+        .set("token", token2)
+        .expect(403)
+        .then((response) => {
+          expect(response.body).toBe("You cannot delete this appointment");
+        });
+    });
+    it("A doctor can delete an appointment made by him", async () => {
+      await api
+        .delete(`/appointments/${appointmentId}`)
+        .set("token", token)
+        .expect(204)
+        .then((response) => {
+          expect(response.body).toStrictEqual({});
+        });
+    });
+    it("A non-existing appointment cannot be deleted", async () => {
+      await api
+        .delete(`/appointments/99999`)
+        .set("token", token)
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toBe(
+            "Cannot delete an appointment that does not exist",
+          );
+        });
+    });
   });
 };

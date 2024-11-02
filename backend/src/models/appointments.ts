@@ -129,4 +129,25 @@ export const appointmentModel: AppointmentModel = {
       return "Internal server error";
     }
   },
+  async deleteAppointment(appointmentId, doctorId) {
+    try {
+      const { rows } = await client.query(
+        "SELECT * FROM appointments WHERE id = $1",
+        [appointmentId],
+      );
+      if (rows.length === 0) {
+        return "Cannot delete an appointment that does not exist";
+      }
+      if (rows[0].doctor !== doctorId) {
+        return "You cannot delete this appointment";
+      }
+      await client.query("DELETE FROM appointments WHERE id = $1", [
+        appointmentId,
+      ]);
+      return null;
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
 };

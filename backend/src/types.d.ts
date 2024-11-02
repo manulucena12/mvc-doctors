@@ -70,7 +70,8 @@ export interface AppointmentController {
   createSchedule(req: Request, res: Response): Promise<Response>;
   getAppointments(req: Request, res: Response): Promise<Response>;
   getSingleAppointment(req: Request, res: Response): Promise<Response>;
-  putPattient(req: Request, res: Response): Promise<Response>;
+  putPatient(req: Request, res: Response): Promise<Response>;
+  cancelAppointment(req: Request, res: Response): Promise<Response>;
 }
 
 export interface AppointmentModel {
@@ -101,4 +102,8 @@ export interface AppointmentModel {
     patientId: number,
     reason: string,
   ): Promise<Appointment | string>;
+  deleteAppointment(
+    appointmentId: string,
+    doctorId: number,
+  ): Promise<null | string>;
 }

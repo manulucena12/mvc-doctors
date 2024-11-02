@@ -8,6 +8,7 @@ const {
   getAppointment,
   getAppointments,
   setAppointment,
+  deleteAppointment,
 } = appointmentModel;
 const { getHours } = utils;
 
@@ -109,7 +110,7 @@ export const appointmentController: AppointmentController = {
     }
     return res.status(200).json(appointment);
   },
-  async putPattient(req, res) {
+  async putPatient(req, res) {
     const { id } = req.params;
     const { reason, patient } = req.body;
     if (
@@ -139,5 +140,24 @@ export const appointmentController: AppointmentController = {
       return res.status(status).json(appointment);
     }
     return res.status(200).json(appointment);
+  },
+  async cancelAppointment(req, res) {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json("Missing data");
+    }
+    if (!req.doctorId) {
+      return res.status(500).json("Internal server error");
+    }
+    const response = await deleteAppointment(id, req.doctorId);
+    if (response === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof response === "string") {
+      const status =
+        response === "You cannot delete this appointment" ? 403 : 400;
+      return res.status(status).json(response);
+    }
+    return res.status(204).end();
   },
 };
