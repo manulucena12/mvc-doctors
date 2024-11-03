@@ -82,10 +82,33 @@ export const appointmentModel: AppointmentModel = {
       return "Internal server error";
     }
   },
+  async getCompletedAppointment(appointmentId, doctorId) {
+    try {
+      const { rows } = await client.query(
+        `
+        SELECT appointmentid as id, new.doctor, name as patient, date, doctorid, email FROM (SELECT appointments.id as appointmentid, appointments.doctor as doctorid, name as doctor, patient as patientid, date 
+        FROM appointments 
+        INNER JOIN users ON appointments.doctor = users.id 
+        WHERE appointments.id = $1) as new 
+        INNER JOIN users ON new.patientid = users.id`,
+        [appointmentId],
+      );
+      if (rows.length === 0) {
+        return "Appointment not found";
+      }
+      if (rows[0].doctorid !== doctorId) {
+        return "You cannot access this assigment";
+      }
+      return rows[0];
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
   async getAppointment(appointmentId, doctorId) {
     try {
       const { rows } = await client.query(
-        "SELECT * FROM appointments WHERE id = $1",
+        `SELECT * FROM appointments WHERE id = $1`,
         [appointmentId],
       );
       if (rows.length === 0) {

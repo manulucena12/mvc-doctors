@@ -28,6 +28,5 @@ export const sendEmail = async (
     subject,
     text,
   };
-  const email = await transporter.sendMail(mailOptions);
-  console.log(email);
+  await transporter.sendMail(mailOptions);
 };

@@ -11,7 +11,7 @@ const {
   deleteAppointment,
   newAppointment,
 } = appointmentModel;
-const { getHours } = utils;
+const { getHours, notifyUser } = utils;
 
 export const appointmentController: AppointmentController = {
   async createSchedule(req, res) {
@@ -140,6 +140,7 @@ export const appointmentController: AppointmentController = {
         appointment === "You cannot modify this appointment" ? 403 : 400;
       return res.status(status).json(appointment);
     }
+    await notifyUser(id, req.doctorId, reason, false);
     return res.status(200).json(appointment);
   },
   async cancelAppointment(req, res) {
@@ -150,6 +151,7 @@ export const appointmentController: AppointmentController = {
     if (!req.doctorId) {
       return res.status(500).json("Internal server error");
     }
+    await notifyUser(id, req.doctorId, "none", true);
     const response = await deleteAppointment(id, req.doctorId);
     if (response === "Internal server error") {
       return res.status(500).json("Internal server error");
@@ -188,6 +190,7 @@ export const appointmentController: AppointmentController = {
     if (typeof appointment === "string") {
       return res.status(400).json(appointment);
     }
+    await notifyUser(appointment.id.toString(), req.doctorId, reason, false);
     return res.status(201).json(appointment);
   },
 };

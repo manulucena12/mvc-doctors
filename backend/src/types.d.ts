@@ -32,6 +32,8 @@ export interface Appointment {
   reason: string;
 }
 
+export type CompleteAppointment = Appointment & { email: string };
+
 export interface JwtPalyoad {
   id: number;
   role: string;
@@ -40,6 +42,12 @@ export interface JwtPalyoad {
 
 export interface Utils {
   getHours(beggin: string, end: string): [number, string, number, string];
+  notifyUser(
+    appointmentId: string,
+    doctorId,
+    reason: string,
+    cancel: boolean,
+  ): Promise<void>;
 }
 
 export interface AuthController {
@@ -97,6 +105,10 @@ export interface AppointmentModel {
     appointmentId: string,
     doctorId: number,
   ): Promise<Appointment | string>;
+  getCompletedAppointment(
+    appointmentId: string,
+    doctorId: number,
+  ): Promise<CompleteAppointment | string>;
   setAppointment(
     appointmentId: string,
     doctorId: number,

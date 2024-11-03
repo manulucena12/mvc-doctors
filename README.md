@@ -14,3 +14,4 @@ This is a backend project that can be extended with a frontend. It leverages Typ
 - **PostgreSQL**: As the primary database.
 - **MVC Design Pattern**: Organizes code structure and improves code maintainability.
 - **TDD (Test-Driven Development)**: Ensures high code quality and performance.
+- **Nodemailer**: Email tool to notify users.

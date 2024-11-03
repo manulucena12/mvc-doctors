@@ -1,4 +1,8 @@
+import { sendEmail } from "../mailer";
+import { appointmentModel } from "../models/appointments";
 import { Utils } from "../types";
+
+const { getCompletedAppointment } = appointmentModel;
 
 export const utils: Utils = {
   getHours(beggin, end) {
@@ -23,5 +27,21 @@ export const utils: Utils = {
         ? end.substring(3)
         : end.substring(2);
     return [firstHour, firstTime, secondHour, secondTime];
+  },
+  async notifyUser(appointmentId, doctorId, reason, cancel) {
+    const completeAppointment = await getCompletedAppointment(
+      appointmentId,
+      doctorId,
+    );
+    if (typeof completeAppointment !== "string") {
+      const subject = cancel
+        ? "Appointment canceled"
+        : "New appointment assigned";
+      const email = completeAppointment.email;
+      const message = cancel
+        ? `Hello ${completeAppointment.patient}, your appointment with Dr. ${completeAppointment.doctor} on ${completeAppointment.date} has been canceled, if you do not knew about this, you can contact the doctor via the clinic app`
+        : `Hello ${completeAppointment.patient}, you have an appointment with Dr. ${completeAppointment.doctor} on ${completeAppointment.date} for ${reason}, if you do not remember according an appointment with that doctor, please, send him a message via the clinic app`;
+      sendEmail(subject, email, message);
+    }
   },
 };
