@@ -4,6 +4,7 @@ import { client } from "../src/database";
 
 export const testingAuth = () => {
   let token: string;
+  let patientId: number;
   beforeAll(async () => {
     const password = await bcrypt.hash("passwordadmintester", 10);
     await client.query(
@@ -29,6 +30,7 @@ export const testingAuth = () => {
         })
         .expect(201)
         .then((response) => {
+          patientId = response.body.id;
           expect(response.body.name).toBeDefined();
         });
     });
@@ -135,6 +137,15 @@ export const testingAuth = () => {
         .then((response) => {
           expect(response.body).toBe("Missing Data");
         });
+    });
+    it("Deleting an user works properly", async () => {
+      await api
+        .delete(`/auth/signout/${patientId}`)
+        .set("token", token)
+        .expect(204);
+    });
+    it("Deleting an user without being an admin causes 403", async () => {
+      await api.delete(`/auth/signout/${patientId}`).expect(403);
     });
   });
 };

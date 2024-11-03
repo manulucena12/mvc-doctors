@@ -1,4 +1,5 @@
 import { client } from "../database";
+import { sendEmail } from "../mailer";
 import { AuthModel } from "../types";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -105,6 +106,33 @@ export const authModel: AuthModel = {
         doctor: rows[0].doctor,
         name: rows[0].name,
       };
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
+  async deleteUser(id) {
+    try {
+      const { rows } = await client.query("SELECT * FROM users WHERE id = $1", [
+        id,
+      ]);
+      if (rows.length === 0) {
+        return "You cannot delete a non-existing user";
+      }
+      if (rows[0].doctor) {
+        await client.query("DELETE FROM appointments WHERE doctor = $1", [id]);
+      }
+      await client.query(
+        "UPDATE appointments SET patient = null, reason = null WHERE patient = $1",
+        [id],
+      );
+      const email = rows[0].email;
+      const message = rows[0].doctor
+        ? `Dr. ${rows[0].name} ,we are sad that you stopped working for us, we hope your time here was great and we desire you the best of luck, thank you`
+        : `${rows[0].name}, we are sad that you leave our services, we hope you enjoyed them the time you had them available, if you regret your choice, we will be waiting you to come back, thank you.`;
+      sendEmail("Your BetterClinic account has been closed", email, message);
+      await client.query("DELETE FROM users WHERE id = $1", [id]);
+      return null;
     } catch (error) {
       console.log(error);
       return "Internal server error";

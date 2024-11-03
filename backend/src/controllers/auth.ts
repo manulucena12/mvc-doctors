@@ -3,7 +3,8 @@ import { authModel } from "../models/auth";
 import { AuthController } from "../types";
 import bcrypt from "bcryptjs";
 
-const { createUser, createDoctor, emailLogin, nameLogin } = authModel;
+const { createUser, createDoctor, emailLogin, nameLogin, deleteUser } =
+  authModel;
 
 export const authController: AuthController = {
   async signup(req, res) {
@@ -55,5 +56,19 @@ export const authController: AuthController = {
       console.log(error);
       return res.status(500).json("Internal server error");
     }
+  },
+  async signout(req, res) {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json("No id provided");
+    }
+    const response = await deleteUser(id);
+    if (response === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof response === "string") {
+      return res.status(400).json(response);
+    }
+    return res.status(204).end();
   },
 };

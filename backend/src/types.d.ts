@@ -59,6 +59,10 @@ export interface AuthController {
     req: Request<NonNullable<unknown>, NonNullable<unknown>, User>,
     res: Response,
   ): Promise<Response>;
+  signout(
+    req: Request<{ id: string }, NonNullable<unknown>, User>,
+    res: Response,
+  ): Promise<Response>;
 }
 
 export interface AuthModel {
@@ -66,6 +70,7 @@ export interface AuthModel {
   createDoctor(user: User): Promise<User | string>;
   emailLogin(email: string, password: string): Promise<Token | string>;
   nameLogin(name: string, password: string): Promise<Token | string>;
+  deleteUser(id: string): Promise<null | string>;
 }
 
 export interface AuthMiddleware {
