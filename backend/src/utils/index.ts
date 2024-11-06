@@ -1,3 +1,4 @@
+import { client } from "../database";
 import { sendEmail } from "../mailer";
 import { appointmentModel } from "../models/appointments";
 import { Utils } from "../types";
@@ -43,5 +44,30 @@ export const utils: Utils = {
         : `Hello ${completeAppointment.patient}, you have an appointment with Dr. ${completeAppointment.doctor} on ${completeAppointment.date} for ${reason}, if you do not remember according an appointment with that doctor, please, send him a message via the clinic app`;
       sendEmail(subject, email, message);
     }
+  },
+  async getUserById(id) {
+    const { rows } = await client.query("SELECT * FROM users WHERE id = $1", [
+      id,
+    ]);
+    if (rows.length !== 0) {
+      return rows[0];
+    }
+    return null;
+  },
+  bmiCalculator(cm: number, weight: number) {
+    const m = 0.01 * cm;
+    const imc = weight / (m * m);
+    let status: string;
+    if (imc < 18.5) {
+      status = "Low weight";
+    } else if (imc > 18.5 && imc < 25) {
+      status = "Normal weight";
+    } else if (imc > 25 && imc < 30) {
+      status = "Overweighted";
+    } else {
+      status = "Obesity";
+    }
+
+    return status;
   },
 };

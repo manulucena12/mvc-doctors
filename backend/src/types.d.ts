@@ -34,6 +34,14 @@ export interface Appointment {
 
 export type CompleteAppointment = Appointment & { email: string };
 
+export interface Report {
+  id: number;
+  patient: number;
+  doctor: number;
+  date: string;
+  pdf: Buffer;
+}
+
 export interface JwtPalyoad {
   id: number;
   role: string;
@@ -48,6 +56,8 @@ export interface Utils {
     reason: string,
     cancel: boolean,
   ): Promise<void>;
+  getUserById(id: number): Promise<User | null>;
+  bmiCalculator(cm: number, weight: number): string;
 }
 
 export interface AuthController {
@@ -130,4 +140,31 @@ export interface AppointmentModel {
     patientId: number,
     date: string,
   ): Promise<Appointment | string>;
+}
+
+export interface ReportsController {
+  getReport(req: Request, res: Response): Promise<Response>;
+  nutritonReport(req: Request, res: Response): Promise<Response>;
+}
+
+export interface ReportsModel {
+  saveReport(
+    patientId: number,
+    doctorId: number,
+    doc: Buffer,
+  ): Promise<Report | string>;
+  findReport(id: number): Promise<string | Report>;
+}
+
+export interface ReportsUtils {
+  createNutrition(
+    patientName: string,
+    doctorName: string,
+    weight: number,
+    height: number,
+    fat: number,
+    recommendations: string,
+    patientId: number,
+    doctorId: number,
+  ): Promise<Report>;
 }

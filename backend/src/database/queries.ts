@@ -27,6 +27,14 @@ export const queries = async () => {
             patient INT REFERENCES users(id),
             date TEXT NOT NULL
             );`);
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS reports(
+            id SERIAL PRIMARY KEY,
+            patient INT NOT NULL REFERENCES users(id),
+            doctor INT NOT NULL REFERENCES users(id),
+            date TEXT NOT NULL DEFAULT NOW(),
+            pdf BYTEA
+            );`);
     console.log("Quieries has been executed succesfully");
   } catch (error) {
     console.log("Queries were not exectuted: ", error);
