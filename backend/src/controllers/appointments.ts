@@ -178,6 +178,11 @@ export const appointmentController: AppointmentController = {
     if (!req.doctorId) {
       return res.status(500).json("Internal server error");
     }
+    if (req.doctorId === patient) {
+      return res
+        .status(400)
+        .json("You cannot have an appointment with yourself");
+    }
     const appointment = await newAppointment(
       reason,
       req.doctorId,

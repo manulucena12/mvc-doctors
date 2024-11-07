@@ -4,6 +4,7 @@ declare global {
   namespace Express {
     interface Request {
       doctorId?: number;
+      userId?: number;
     }
   }
 }
@@ -81,6 +82,7 @@ export interface AuthModel {
   emailLogin(email: string, password: string): Promise<Token | string>;
   nameLogin(name: string, password: string): Promise<Token | string>;
   deleteUser(id: string): Promise<null | string>;
+  checkNames(name: string): Promise<boolean>;
 }
 
 export interface AuthMiddleware {
@@ -166,5 +168,6 @@ export interface ReportsUtils {
     recommendations: string,
     patientId: number,
     doctorId: number,
+    patology: string,
   ): Promise<Report>;
 }

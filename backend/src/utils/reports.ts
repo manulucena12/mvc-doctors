@@ -16,6 +16,7 @@ export const reportsUtils: ReportsUtils = {
     recommendations,
     patientId,
     doctorId,
+    patology,
   ) {
     const buffers: Buffer[] = [];
     const doc = new PDFDocument();
@@ -34,14 +35,18 @@ export const reportsUtils: ReportsUtils = {
       doc
         .fontSize(25)
         .text(`Nutrion report by Dr. ${doctorName} for patient ${patientName}`);
-      doc.fontSize(15).text(`${patientName}'s Cineantropometric Profile`);
-      doc.fontSize(12).text(`
+      doc.moveDown(2);
+      doc.fontSize(17).text(`Patology: ${patology}`);
+      doc.fontSize(17).text(`${patientName}'s Cineantropometric Profile`);
+      doc.moveDown(2);
+      doc.fontSize(15).text(`
             -Weight: ${weight} Cm
             -Height: ${height} Kg
             -BMI: ${bmi}
             -Fat: ${fat}%
         `);
-      doc.fontSize(12).text(`Recommendations: ${recommendations}`);
+      doc.moveDown(2);
+      doc.fontSize(15).text(`Recommendations: ${recommendations}`);
       doc.end();
     });
   },

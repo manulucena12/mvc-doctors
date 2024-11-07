@@ -138,4 +138,14 @@ export const authModel: AuthModel = {
       return "Internal server error";
     }
   },
+  async checkNames(name) {
+    const { rows } = await client.query(
+      "SELECT name FROM users WHERE name = $1",
+      [name],
+    );
+    if (rows.length > 1) {
+      return true;
+    }
+    return false;
+  },
 };

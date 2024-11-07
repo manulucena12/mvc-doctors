@@ -3,8 +3,14 @@ import { authModel } from "../models/auth";
 import { AuthController } from "../types";
 import bcrypt from "bcryptjs";
 
-const { createUser, createDoctor, emailLogin, nameLogin, deleteUser } =
-  authModel;
+const {
+  createUser,
+  createDoctor,
+  emailLogin,
+  nameLogin,
+  deleteUser,
+  checkNames,
+} = authModel;
 
 export const authController: AuthController = {
   async signup(req, res) {
@@ -42,6 +48,16 @@ export const authController: AuthController = {
       return res.status(400).json("Missing Data");
     }
     try {
+      if (name) {
+        const sameName = await checkNames(name);
+        if (sameName) {
+          return res
+            .status(400)
+            .json(
+              "Sorry, there are more users registered with your same name, please, login with your email",
+            );
+        }
+      }
       const token = email
         ? await emailLogin(email, password)
         : await nameLogin(name, password);

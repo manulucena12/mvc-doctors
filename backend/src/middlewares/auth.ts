@@ -19,6 +19,7 @@ export const authMiddleware: AuthMiddleware = {
     if (rows.length === 0) {
       return res.status(404).json("No user registered");
     }
+    req.userId = decodedToken.id;
     return next();
   },
   async verifyAdmin(req, res, next) {

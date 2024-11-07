@@ -17,7 +17,7 @@ export const reportsModel: ReportsModel = {
   async findReport(id) {
     try {
       const { rows } = await client.query(
-        "SELECT pdf, id FROM reports WHERE id = $1",
+        "SELECT pdf, id, patient, doctor FROM reports WHERE id = $1",
         [id],
       );
       if (rows.length === 0) {

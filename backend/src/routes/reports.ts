@@ -4,9 +4,9 @@ import { authMiddleware } from "../middlewares/auth";
 
 const reportsRouter = Router();
 const { nutritonReport, getReport } = reportsController;
-const { verifyDoctor } = authMiddleware;
+const { verifyDoctor, verifyToken } = authMiddleware;
 
-reportsRouter.get("/:id", getReport);
+reportsRouter.get("/:id", verifyToken, getReport);
 
 reportsRouter.post("/nutrition", verifyDoctor, nutritonReport);
 

@@ -8,6 +8,9 @@ import reportsRouter from "./routes/reports";
 
 export const app = express();
 const PORT = process.env.PORT || 3002;
+export const baseUrl = process.env.API_URL
+  ? `${process.env.API_URL}/${PORT}`
+  : `http://localhost/${PORT}`;
 
 app.use(express.json());
 app.use("/auth", authRouter);
@@ -17,5 +20,5 @@ app.use("/reports", reportsRouter);
 export const server = app.listen(PORT, async () => {
   await databaseConnection();
   await queries();
-  console.log(`Running on http://localhost:${PORT}`);
+  console.log(`Running on ${baseUrl}`);
 });
