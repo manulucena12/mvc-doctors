@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 export const testingReports = () => {
   let token: string;
   let patientId: number;
+  let reportId: number;
   beforeAll(async () => {
     const password = await bcrypt.hash("passwordadmintester", 10);
     await client.query(
@@ -36,13 +37,35 @@ export const testingReports = () => {
           weight: 85,
           height: 174,
           patology: "diabetes",
+          bmr: 1500,
+          ch: 500,
+          lipids: 600,
+          proteins: 600,
+          goal: "Loose 5 kg in the upcoming 3 months",
           fat: 24,
           recommendations:
             "No high-glucemic foods, such as sugars, cookies, etc.",
         })
         .expect(201)
         .then((response) => {
+          reportId = response.body.id;
           expect(response.body.id).toBeDefined();
+        });
+    });
+    it("Getting a report works properly", async () => {
+      await api
+        .get(`/reports/${reportId}`)
+        .set("token", token)
+        .expect(200)
+        .expect("Content-Type", /pdf/);
+    });
+    it("A patient or doctor can access to the reports he is in or he has created", async () => {
+      await api
+        .get(`/reports/user/doctor`)
+        .set("token", token)
+        .expect(200)
+        .then((response) => {
+          expect(Array.isArray(response.body)).toBeTruthy();
         });
     });
   });

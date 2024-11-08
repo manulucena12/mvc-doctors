@@ -29,4 +29,34 @@ export const reportsModel: ReportsModel = {
       return "Internal server error";
     }
   },
+  async getDoctorReports(id) {
+    try {
+      const { rows } = await client.query(
+        "SELECT id, patient, doctor, date FROM reports WHERE doctor = $1",
+        [id],
+      );
+      if (rows.length === 0) {
+        return "You have not created any report yet";
+      }
+      return rows;
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
+  async getPatientReports(id) {
+    try {
+      const { rows } = await client.query(
+        "SELECT id, patient, doctor, date FROM reports WHERE patient = $1",
+        [id],
+      );
+      if (rows.length === 0) {
+        return "You have not created any report yet";
+      }
+      return rows;
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
 };

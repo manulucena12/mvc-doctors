@@ -6,7 +6,7 @@ import { sendEmail } from "../mailer";
 
 const { getUserById } = utils;
 const { createNutrition } = reportsUtils;
-const { findReport } = reportsModel;
+const { findReport, getDoctorReports, getPatientReports } = reportsModel;
 
 export const reportsController: ReportsController = {
   async getReport(req, res) {
@@ -32,7 +32,7 @@ export const reportsController: ReportsController = {
         "Content-Disposition",
         `attachment; filename="report_${report.id}.pdf"`,
       );
-      return res.send(report.pdf);
+      return res.status(200).send(report.pdf);
     }
     if (report === "Internal server error") {
       return res.status(500).json("Internal server error");
@@ -40,18 +40,38 @@ export const reportsController: ReportsController = {
     return res.status(400).json(report);
   },
   async nutritonReport(req, res) {
-    const { patient, weight, height, patology, fat, recommendations } =
-      req.body;
+    const {
+      patient,
+      weight,
+      height,
+      patology,
+      fat,
+      recommendations,
+      bmr,
+      ch,
+      lipids,
+      proteins,
+      goal,
+    } = req.body;
     if (
+      !ch ||
+      !lipids ||
+      !proteins ||
+      !bmr ||
       !patient ||
       !weight ||
       !height ||
       !patology ||
       !fat ||
+      !goal ||
       !recommendations ||
       typeof weight !== "number" ||
       typeof height !== "number" ||
-      typeof fat !== "number"
+      typeof fat !== "number" ||
+      typeof bmr !== "number" ||
+      typeof ch !== "number" ||
+      typeof lipids !== "number" ||
+      typeof proteins !== "number"
     ) {
       return res.status(400).json("Missing data or invalid types");
     }
@@ -74,6 +94,11 @@ export const reportsController: ReportsController = {
         patient,
         req.doctorId,
         patology,
+        bmr,
+        ch,
+        lipids,
+        proteins,
+        goal,
       );
       sendEmail(
         "New report for you",
@@ -85,5 +110,22 @@ export const reportsController: ReportsController = {
       console.log(error);
       return res.status(500).json("Internal server error");
     }
+  },
+  async getUserReports(req, res) {
+    if (!req.doctorId && !req.userId) {
+      return res.status(403).json("Unathorized");
+    }
+    const userReports = req.doctorId
+      ? await getDoctorReports(req.doctorId)
+      : req.userId
+        ? await getPatientReports(req.userId)
+        : "Internal server error";
+    if (userReports === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof userReports === "string") {
+      return res.status(400).json(userReports);
+    }
+    return res.status(200).json(userReports);
   },
 };

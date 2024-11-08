@@ -61,6 +61,23 @@ export interface Utils {
   bmiCalculator(cm: number, weight: number): string;
 }
 
+interface NutritionFact {
+  carbohydrates: number;
+  fiber: number;
+  protein: number;
+  fat: number;
+  sugars: number;
+  vitamins: string[];
+  minerals: Array;
+}
+
+export interface Food {
+  id: number;
+  name: string;
+  calories: number;
+  nutritionFacts: NutritionFact;
+}
+
 export interface AuthController {
   signup(
     req: Request<NonNullable<unknown>, NonNullable<unknown>, User>,
@@ -147,6 +164,7 @@ export interface AppointmentModel {
 export interface ReportsController {
   getReport(req: Request, res: Response): Promise<Response>;
   nutritonReport(req: Request, res: Response): Promise<Response>;
+  getUserReports(req: Request, res: Response): Promise<Response>;
 }
 
 export interface ReportsModel {
@@ -156,6 +174,8 @@ export interface ReportsModel {
     doc: Buffer,
   ): Promise<Report | string>;
   findReport(id: number): Promise<string | Report>;
+  getDoctorReports(id: number): Promise<Report[] | string>;
+  getPatientReports(id: number): Promise<Report[] | string>;
 }
 
 export interface ReportsUtils {
@@ -169,5 +189,10 @@ export interface ReportsUtils {
     patientId: number,
     doctorId: number,
     patology: string,
+    bmr: number,
+    ch: number,
+    lipids: number,
+    protein: number,
+    goal: string,
   ): Promise<Report>;
 }
