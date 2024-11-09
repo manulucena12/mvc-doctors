@@ -59,4 +59,23 @@ export const reportsModel: ReportsModel = {
       return "Internal server error";
     }
   },
+  async deleteReport(id, doctorId) {
+    try {
+      const { rows } = await client.query(
+        "SELECT doctor FROM reports WHERE id = $1",
+        [id],
+      );
+      if (rows.length === 0) {
+        return "You cannot delete a report that does not exist";
+      }
+      if (rows[0].doctor !== doctorId) {
+        return "You cannot delete a report that is not yours";
+      }
+      await client.query("DELETE FROM reports WHERE id = $1", [id]);
+      return null;
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
 };

@@ -165,6 +165,7 @@ export interface ReportsController {
   getReport(req: Request, res: Response): Promise<Response>;
   nutritonReport(req: Request, res: Response): Promise<Response>;
   getUserReports(req: Request, res: Response): Promise<Response>;
+  deleteReport(req: Request, res: Response): Promise<Response>;
 }
 
 export interface ReportsModel {
@@ -176,6 +177,7 @@ export interface ReportsModel {
   findReport(id: number): Promise<string | Report>;
   getDoctorReports(id: number): Promise<Report[] | string>;
   getPatientReports(id: number): Promise<Report[] | string>;
+  deleteReport(id: number, doctorId: number): Promise<null | string>;
 }
 
 export interface ReportsUtils {

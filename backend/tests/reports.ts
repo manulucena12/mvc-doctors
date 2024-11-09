@@ -68,5 +68,8 @@ export const testingReports = () => {
           expect(Array.isArray(response.body)).toBeTruthy();
         });
     });
+    it("Deleting a report works properly", async () => {
+      await api.delete(`/reports/${reportId}`).set("token", token).expect(204);
+    });
   });
 };

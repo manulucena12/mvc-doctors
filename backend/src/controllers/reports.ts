@@ -6,7 +6,8 @@ import { sendEmail } from "../mailer";
 
 const { getUserById } = utils;
 const { createNutrition } = reportsUtils;
-const { findReport, getDoctorReports, getPatientReports } = reportsModel;
+const { findReport, getDoctorReports, getPatientReports, deleteReport } =
+  reportsModel;
 
 export const reportsController: ReportsController = {
   async getReport(req, res) {
@@ -127,5 +128,24 @@ export const reportsController: ReportsController = {
       return res.status(400).json(userReports);
     }
     return res.status(200).json(userReports);
+  },
+  async deleteReport(req, res) {
+    const { id } = req.params;
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json("Missing data or invalid input");
+    }
+    if (!req.doctorId) {
+      return res.status(403).json("Unauthorized");
+    }
+    const response = await deleteReport(Number(id), req.doctorId);
+    if (response === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof response === "string") {
+      const status =
+        response === "You cannot delete a report that is not yours" ? 403 : 400;
+      return res.status(status).json(response);
+    }
+    return res.status(204).end();
   },
 };

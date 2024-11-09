@@ -15,3 +15,4 @@ This is a backend project that can be extended with a frontend. It leverages Typ
 - **MVC Design Pattern**: Organizes code structure and improves code maintainability.
 - **TDD (Test-Driven Development)**: Ensures high code quality and performance.
 - **Nodemailer**: Email tool to notify users.
+- **PDFKit**: Allows to generate PDFs for reports.
