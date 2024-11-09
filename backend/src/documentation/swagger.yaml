@@ -1,0 +1,507 @@
+openapi: 3.0.3
+servers:
+  - url: http://localhost:3002
+info:
+  title: Doctor Management API
+  description: This backend simulates a clinic where doctors can make appointments and chat with patients, create reports, send notifications emails, etc.
+  version: 1.0.0
+  contact:
+    name: GitHub
+    url: https://github.com/manulucena12/mvc-doctors
+tags:
+  - name: Auth Route
+    description: This route manages all the users information, from creating a user to deleting it.
+  - name: Appointment Route
+    description: This route manages appointments between doctors and patients, allowing creation, viewing, updating, and deleting appointments.
+  - name: Reports Route
+    description: This route manages reports created by doctors for their patients.
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - Auth Route
+      summary: Creates a user
+      description: Allows an admin to create a user (doctor or patient) by providing their name, email, and password.
+      operationId: createUser
+      parameters:
+        - $ref: '#/components/parameters/token'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  description: The full name of the user (doctor or patient).
+                doctor:
+                  type: boolean
+                email:
+                  type: string
+                  description: The email address of the user.
+                password:
+                  type: string
+                  description: The password for the user's account.
+
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  doctor:
+                    type: boolean
+                    example: true
+                  id:
+                    type: integer
+                    description: The ID of the newly created user.
+        '400':
+          description: Missing Data, Email already taken.
+        '500':
+          description: Internal server error.
+  /auth/signin:
+    post:
+      tags:
+        - Auth Route
+      summary: Login
+      description: Gives a token once it receives the correct data from users.
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  description: The email address of the user.
+                password:
+                  type: string
+                  description: The password for the user's account.
+      responses:
+        '200':
+          description: User logged successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  token:
+                    type: string
+                  doctor:
+                    type: boolean
+                  id:
+                    type: integer
+                    description: The ID of the newly created user.
+        '400':
+          description: Missing Data, password or name/email incorrect.
+        '500':
+          description: Internal server error.
+  /auth/signout:
+    delete:
+      tags:
+        - Auth Route
+      summary: Deletes a user
+      description: It deletes an user and its all data is destroyed. This endpoint cannot be tried
+      operationId: deleteUser
+      parameters:
+        - $ref: '#/components/parameters/token'
+      responses:
+        '204':
+          description: User delete successfully
+        '400':
+          description: Missing Data.
+        '500':
+          description: Internal server error.
+  /appointments/schedule:
+    post:
+      tags:
+        - Appointment Route
+      summary: Schedule available appointment times
+      description: Allows doctors to create a schedule for available appointment times.
+      operationId: createSchedule
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - day
+                - beggin
+                - end
+              properties:
+                day:
+                  type: string
+                  description: The day of the schedule.
+                beggin:
+                  type: string
+                  description: The start time in HH:MM format.
+                end:
+                  type: string
+                  description: The end time in HH:MM format.
+      responses:
+        '201':
+          description: Schedule created successfully
+        '400':
+          description: Missing data or invalid time format
+        '500':
+          description: Internal server error
+
+  /appointments:
+    post:
+      tags:
+        - Appointment Route
+      summary: Create a new appointment
+      description: Allows doctors to create a new appointment for a patient.
+      operationId: createAppointment
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+                - date
+                - patient
+              properties:
+                reason:
+                  type: string
+                  description: The reason for the appointment.
+                date:
+                  type: string
+                  description: The date of the appointment in YYYY-MM-DD format.
+                patient:
+                  type: integer
+                  description: The ID of the patient.
+      responses:
+        '201':
+          description: Appointment created successfully
+        '400':
+          description: Missing data or invalid types
+        '500':
+          description: Internal server error
+
+  /appointments/{id}:
+    get:
+      tags:
+        - Appointment Route
+      summary: Get a single appointment by ID
+      description: Allows doctors to retrieve a single appointment by ID.
+      operationId: getSingleAppointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the appointment.
+      responses:
+        '200':
+          description: Appointment retrieved successfully
+        '400':
+          description: Missing data
+        '500':
+          description: Internal server error
+
+    put:
+      tags:
+        - Appointment Route
+      summary: Update an appointment with patient information
+      description: Allows doctors to update an appointment with a patient and reason.
+      operationId: putPatient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the appointment.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+                - patient
+              properties:
+                reason:
+                  type: string
+                  description: Reason for the appointment.
+                patient:
+                  type: integer
+                  description: ID of the patient.
+      responses:
+        '200':
+          description: Appointment updated successfully
+        '400':
+          description: Missing data or invalid types
+        '403':
+          description: Unauthorized to modify this appointment
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - Appointment Route
+      summary: Cancel an appointment by ID
+      description: Allows doctors to cancel an appointment by its ID.
+      operationId: cancelAppointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the appointment.
+      responses:
+        '204':
+          description: Appointment canceled successfully
+        '400':
+          description: Missing data
+        '403':
+          description: Unauthorized to delete this appointment
+        '500':
+          description: Internal server error
+  /reports/{id}:
+    get:
+      tags:
+        - Reports Route
+      summary: Retrieve a specific report by ID
+      description: Allows authorized users to retrieve a report by its ID. Only the report's doctor or patient can access it.
+      operationId: getReport
+      parameters:
+        - $ref: '#/components/parameters/patientToken'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the report to retrieve.
+      responses:
+        '200':
+          description: Report retrieved successfully as a PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing or invalid ID
+        '403':
+          description: Unauthorized access
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+        - Reports Route
+      summary: Delete a report by ID
+      description: Allows doctors to delete a report by its ID.
+      operationId: deleteReport
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The ID of the report to delete.
+      responses:
+        '204':
+          description: Report deleted successfully
+        '400':
+          description: Missing or invalid ID
+        '403':
+          description: Unauthorized to delete this report
+        '500':
+          description: Internal server error
+
+  /reports/nutrition:
+    post:
+      tags:
+        - Reports Route
+      summary: Create a nutrition report
+      description: Allows a doctor to create a nutrition report for a patient.
+      operationId: createNutritionReport
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patient
+                - weight
+                - height
+                - patology
+                - fat
+                - recommendations
+                - bmr
+                - ch
+                - lipids
+                - proteins
+                - goal
+              properties:
+                patient:
+                  type: integer
+                  description: The ID of the patient.
+                weight:
+                  type: number
+                  format: float
+                  description: The patient's weight.
+                height:
+                  type: number
+                  format: float
+                  description: The patient's height.
+                patology:
+                  type: string
+                  description: Any relevant medical condition.
+                fat:
+                  type: number
+                  format: float
+                  description: The patient's body fat percentage.
+                recommendations:
+                  type: string
+                  description: Doctor's recommendations for the patient.
+                bmr:
+                  type: number
+                  description: Basal metabolic rate.
+                ch:
+                  type: number
+                  description: Carbohydrates intake level.
+                lipids:
+                  type: number
+                  description: Lipid intake level.
+                proteins:
+                  type: number
+                  description: Protein intake level.
+                goal:
+                  type: string
+                  description: Nutritional goals for the patient.
+      responses:
+        '201':
+          description: Nutrition report created successfully
+        '400':
+          description: Missing data or invalid types
+        '500':
+          description: Internal server error
+
+  /reports/user/doctor:
+    get:
+      tags:
+        - Reports Route
+      summary: Get reports by doctor
+      description: Allows a doctor to retrieve all reports they have created.
+      operationId: getDoctorReports
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    date:
+                      type: string
+                      format: date
+                    patient:
+                      type: string
+                      description: Name of the patient in the report.
+                    doctor:
+                      type: string
+                      description: Name of the doctor who created the report.
+        '403':
+          description: Unauthorized access
+        '500':
+          description: Internal server error
+
+  /reports/user/patient:
+    get:
+      tags:
+        - Reports Route
+      summary: Get reports for a patient
+      description: Allows a patient to retrieve all reports assigned to them.
+      operationId: getPatientReports
+      parameters:
+        - $ref: '#/components/parameters/patientToken'
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    date:
+                      type: string
+                      format: date
+                    patient:
+                      type: string
+                      description: Name of the patient in the report.
+                    doctor:
+                      type: string
+                      description: Name of the doctor who created the report.
+        '403':
+          description: Unauthorized access
+        '500':
+          description: Internal server error
+components:
+  parameters:
+    token:
+      in: header
+      name: token
+      description: Only admin token can create/delete an user
+      required: true
+      schema:
+        type: string
+        example: "JWT"
+    patientToken:
+      in: header
+      name: token
+      description: Tokens for users authentication
+      required: true
+      schema:
+        type: string
+        example: "JWT"
+    doctorToken:
+      in: header
+      name: token
+      description: Only doctors can create/delete/update appointments/reports
+      required: true
+      schema:
+        type: string
+        example: "JWT"
