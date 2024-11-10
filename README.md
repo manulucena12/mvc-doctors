@@ -17,3 +17,4 @@ This is a backend project that can be extended with a frontend. It leverages Typ
 - **Nodemailer**: Email tool to notify users.
 - **PDFKit**: Allows to generate PDFs for reports.
 - **Swagger**: Generate API documentation tool.
+- **Socket.io**: Sockets to manage messages and chats.

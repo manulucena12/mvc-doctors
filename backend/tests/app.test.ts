@@ -1,10 +1,11 @@
 import supertest from "supertest";
-import { app, server } from "../src";
+import { app, io, server } from "../src";
 import { client } from "../src/database";
 import { testingAuth } from "./auth";
 import { queries } from "../src/database/queries";
 import { testingAppointments } from "./appointments";
 import { testingReports } from "./reports";
+import { testingChats } from "./chats";
 
 export const api = supertest(app);
 
@@ -16,13 +17,17 @@ describe("Testing api", () => {
   testingAuth();
   testingAppointments();
   testingReports();
+  testingChats();
 
   afterAll(async () => {
     await client.query("DELETE FROM appointments");
+    await client.query("DELETE FROM messages");
+    await client.query("DELETE FROM chats");
     await client.query("DELETE FROM reports");
     await client.query("DELETE FROM users");
     await client.end();
     console.log("Deleted data and ended connection");
+    io.close();
     server.close();
   });
 });

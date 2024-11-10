@@ -35,6 +35,22 @@ export const queries = async () => {
             date TEXT NOT NULL DEFAULT NOW(),
             pdf BYTEA
             );`);
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS chats(
+            id SERIAL PRIMARY KEY,
+            patient INT NOT NULL REFERENCES users(id),
+            doctor INT NOT NULL REFERENCES users(id),
+            patientview BOOLEAN DEFAULT TRUE,
+            doctorview BOOLEAN DEFAULT TRUE
+            );`);
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS messages(
+            id SERIAL PRIMARY KEY,
+            sender INT NOT NULL REFERENCES users(id),
+            chat INT NOT NULL REFERENCES chats(id),
+            content TEXT NOT NULL,
+            date TEXT NOT NULL DEFAULT NOW()
+            );`);
     console.log("Quieries has been executed succesfully");
   } catch (error) {
     console.log("Queries were not exectuted: ", error);

@@ -78,6 +78,21 @@ export interface Food {
   nutritionFacts: NutritionFact;
 }
 
+export interface Message {
+  sender: number;
+  content: string;
+  id: number;
+  chat: number;
+  date: string;
+}
+
+export interface Chat {
+  id: number;
+  patient: number;
+  doctor: number;
+  messages: Message[];
+}
+
 export interface AuthController {
   signup(
     req: Request<NonNullable<unknown>, NonNullable<unknown>, User>,
@@ -197,4 +212,20 @@ export interface ReportsUtils {
     protein: number,
     goal: string,
   ): Promise<Report>;
+}
+
+export interface ChatsController {
+  createChat(req: Request, res: Response): Promise<Response>;
+  getChat(req: Request, res: Response): Promise<Response>;
+  createMessage(req: Request, res: Response): Promise<Response>;
+}
+
+export interface ChatsModel {
+  newChat(patientId: number, doctorId: number): Promise<Chat | string>;
+  getChat(chatId: number, userId: number): Promise<Chat | string>;
+  newMessage(
+    senderId: number,
+    chatId: number,
+    content: string,
+  ): Promise<Message | string>;
 }
