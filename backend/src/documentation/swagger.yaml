@@ -15,6 +15,8 @@ tags:
     description: This route manages appointments between doctors and patients, allowing creation, viewing, updating, and deleting appointments.
   - name: Reports Route
     description: This route manages reports created by doctors for their patients.
+  - name: Chats Route
+    description: This route allows doctors and patient to send menssages each other.
 paths:
   /auth/signup:
     post:
@@ -479,6 +481,176 @@ paths:
           description: Unauthorized access
         '500':
           description: Internal server error
+  /chats/doctor/{id}:
+    get:
+      tags:
+        - Chats Route
+      summary: Get a chat as a doctor.
+      description: Retrieve a chat thread by chat ID, accessible only to doctors.
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The unique identifier of the chat.
+      responses:
+        '200':
+          description: Successfully retrieved chat.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: { chat: {...} }
+        '400':
+          description: Missing or invalid chat ID.
+        '403':
+          description: Unauthorized access to the chat.
+        '500':
+          description: Internal server error.
+
+  /chats/patient/{id}:
+    get:
+      tags:
+        - Chats Route
+      summary: Get a chat as a patient.
+      description: Retrieve a chat thread by chat ID, accessible only to patients.
+      parameters:
+        - $ref: '#/components/parameters/patientToken'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The unique identifier of the chat.
+      responses:
+        '200':
+          description: Successfully retrieved chat.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: { chat: {...} }
+        '400':
+          description: Missing or invalid chat ID.
+        '403':
+          description: Unauthorized access to the chat.
+        '500':
+          description: Internal server error.
+
+  /chats:
+    post:
+      tags:
+        - Chats Route
+      summary: Create a new chat between doctor and patient.
+      description: Allows a doctor to create a new chat with a specified patient.
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patient:
+                  type: integer
+                  description: The unique ID of the patient.
+              required:
+                - patient
+      responses:
+        '201':
+          description: Chat successfully created.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: { chatId: 1, patientId: 2, doctorId: 3, messages: [] }
+        '400':
+          description: Missing or invalid data.
+        '403':
+          description: Unauthorized.
+        '500':
+          description: Internal server error.
+
+  /chats/doctor/messages:
+    post:
+      tags:
+        - Chats Route
+      summary: Send a message in chat as a doctor.
+      description: Allows a doctor to send a message in an existing chat.
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat:
+                  type: integer
+                  description: The unique ID of the chat.
+                content:
+                  type: string
+                  description: The message content.
+              required:
+                - chat
+                - content
+      responses:
+        '201':
+          description: Message successfully sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: { messageId: 1, chatId: 1, senderId: 3, content: "Hello" }
+        '400':
+          description: Missing or invalid data.
+        '403':
+          description: Unauthorized access to chat.
+        '500':
+          description: Internal server error.
+
+  /chats/patient/messages:
+    post:
+      tags:
+        - Chats Route
+      summary: Send a message in chat as a patient.
+      description: Allows a patient to send a message in an existing chat.
+      parameters:
+        - $ref: '#/components/parameters/token'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat:
+                  type: integer
+                  description: The unique ID of the chat.
+                content:
+                  type: string
+                  description: The message content.
+              required:
+                - chat
+                - content
+      responses:
+        '201':
+          description: Message successfully sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: { messageId: 1, chatId: 1, senderId: 2, content: "Hello Doctor" }
+        '400':
+          description: Missing or invalid data.
+        '403':
+          description: Unauthorized access to chat.
+        '500':
+          description: Internal server error.
 components:
   parameters:
     token:

@@ -79,6 +79,21 @@ export const chatsController: ChatsController = {
       const status = response === "You cannot access this chat" ? 403 : 400;
       return res.status(status).json(response);
     }
+    const fullChat = await getChat(chat, senderId);
+    if (typeof fullChat !== "string") {
+      const receiverId = req.doctorId ? fullChat.patient : fullChat.doctor;
+      const fullReceiver = await getUserById(receiverId);
+      const fullSender = await getUserById(senderId);
+      if (fullReceiver && fullSender) {
+        const subject = req.doctorId
+          ? `New message from Dr. ${fullSender.name}`
+          : `New message from your patient ${fullSender.name}`;
+        const message = req.doctorId
+          ? `Hello ${fullReceiver.name}, we comunnicate you that Dr. ${fullSender.name} has sent a message for you: '${content}', to see or respond it, go to app -> 'My chats' -> 'Chat with Dr. ${fullSender.name}'`
+          : `Hello Dr. ${fullReceiver.name}, we comunnicate you that your patient ${fullSender.name} has sent a message for you: '${content}', to see or respond it, go to app -> 'My chats' -> 'Chat with ${fullSender.name}'`;
+        sendEmail(subject, fullReceiver.email, message);
+      }
+    }
     io.emit("New-Message", response);
     return res.status(201).json(response);
   },

@@ -99,5 +99,14 @@ export const testingChats = () => {
           expect(response.body.id).toBeDefined();
         });
     });
+    it("A person who is not the patient or doctor of the chat cannot access send a message in it", async () => {
+      await api
+        .post("/chats/patient/messages")
+        .send({
+          chat: chatId,
+          content: "I am a troll and I dont need a token to send messages",
+        })
+        .expect(403);
+    });
   });
 };
