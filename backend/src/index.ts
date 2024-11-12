@@ -13,6 +13,7 @@ import path from "path";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import chatsRouter from "./routes/chats";
+import proofsRouter from "./routes/proofs";
 
 export const app = express();
 export const server = createServer(app);
@@ -34,6 +35,7 @@ app.use("/auth", authRouter);
 app.use("/appointments", appointmentsRouter);
 app.use("/reports", reportsRouter);
 app.use("/chats", chatsRouter);
+app.use("/proofs", proofsRouter);
 
 server.listen(PORT, async () => {
   await databaseConnection();

@@ -51,6 +51,14 @@ export const queries = async () => {
             content TEXT NOT NULL,
             date TEXT NOT NULL DEFAULT NOW()
             );`);
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS proofs(
+            id SERIAL PRIMARY KEY,
+            aproved BOOLEAN,
+            patient INT NOT NULL REFERENCES users(id),
+            doctor INT NOT NULL REFERENCES users(id),
+            file BYTEA
+            );`);
     console.log("Quieries has been executed succesfully");
   } catch (error) {
     console.log("Queries were not exectuted: ", error);

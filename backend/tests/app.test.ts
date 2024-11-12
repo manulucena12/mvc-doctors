@@ -6,6 +6,7 @@ import { queries } from "../src/database/queries";
 import { testingAppointments } from "./appointments";
 import { testingReports } from "./reports";
 import { testingChats } from "./chats";
+import { testingProofs } from "./proofs";
 
 export const api = supertest(app);
 
@@ -18,9 +19,11 @@ describe("Testing api", () => {
   testingAppointments();
   testingReports();
   testingChats();
+  testingProofs();
 
   afterAll(async () => {
     await client.query("DELETE FROM appointments");
+    await client.query("DELETE FROM proofs");
     await client.query("DELETE FROM messages");
     await client.query("DELETE FROM chats");
     await client.query("DELETE FROM reports");

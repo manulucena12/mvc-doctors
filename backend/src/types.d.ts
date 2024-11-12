@@ -93,6 +93,13 @@ export interface Chat {
   messages: Message[];
 }
 
+export interface Proof {
+  id: number;
+  patient: number;
+  doctor: number;
+  aproved?: boolean;
+}
+
 export interface AuthController {
   signup(
     req: Request<NonNullable<unknown>, NonNullable<unknown>, User>,
@@ -228,4 +235,12 @@ export interface ChatsModel {
     chatId: number,
     content: string,
   ): Promise<Message | string>;
+}
+
+export interface ProofController {
+  requestProof(req: Request, res: Response): Promise<Response>;
+}
+
+export interface ProofModel {
+  newRequest(userId: number, doctorId: number): Promise<Proof | string>;
 }
