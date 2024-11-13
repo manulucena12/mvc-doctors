@@ -2,9 +2,11 @@ import { sendEmail } from "../mailer";
 import { proofModel } from "../models/proofs";
 import { ProofController } from "../types";
 import { utils } from "../utils";
+import { reportsUtils } from "../utils/reports";
 
 const { getUserById } = utils;
-const { newRequest } = proofModel;
+const { newRequest, manageRequest } = proofModel;
+const { createProof } = reportsUtils;
 
 export const proofController: ProofController = {
   async requestProof(req, res) {
@@ -38,5 +40,57 @@ export const proofController: ProofController = {
       `Hi Dr. ${fullDoctor.name}, your patient ${fullUser.name} has recently created a new proof request, if you want to accept or deny it go to the app -> 'My requests'`,
     );
     return res.status(201).json(response);
+  },
+  async manageRequest(req, res) {
+    const { proofId } = req.params;
+    const { aproved, reason, date } = req.body;
+    if (typeof aproved !== "boolean" || !proofId || isNaN(Number(proofId))) {
+      return res.status(400).json("Missing data or invalid type");
+    }
+    if (!req.doctorId) {
+      return res.status(403).json("Unauthorized");
+    }
+    if (aproved === false) {
+      const response = await manageRequest(
+        Number(proofId),
+        req.doctorId,
+        false,
+        "none",
+      );
+      if (!response) {
+        return res.status(204).end();
+      }
+      if (response === "Internal server error") {
+        return res.status(500).json("Internal server error");
+      }
+      if (typeof response === "string") {
+        const status =
+          response === "You cannot cancel a proof that is not requested to you"
+            ? 403
+            : 400;
+        return res.status(status).json(response);
+      }
+      return res.status(500).json("Internal server error");
+    }
+    if (!reason || !date) {
+      return res.status(400).json("Missing parameters reason and date");
+    }
+    const response = await createProof(
+      Number(proofId),
+      req.doctorId,
+      reason,
+      date,
+    );
+    if (response === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof response === "string") {
+      const status =
+        response === "You cannot cancel a proof that is not requested to you"
+          ? 403
+          : 400;
+      return res.status(status).json(response);
+    }
+    return res.status(200).json(response);
   },
 };

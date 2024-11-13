@@ -219,6 +219,12 @@ export interface ReportsUtils {
     protein: number,
     goal: string,
   ): Promise<Report>;
+  createProof(
+    proofId: number,
+    doctorId: number,
+    reason: string,
+    date: string,
+  ): Promise<Proof | null | string>;
 }
 
 export interface ChatsController {
@@ -239,8 +245,16 @@ export interface ChatsModel {
 
 export interface ProofController {
   requestProof(req: Request, res: Response): Promise<Response>;
+  manageRequest(req: Request, res: Response): Promise<Response>;
 }
 
 export interface ProofModel {
   newRequest(userId: number, doctorId: number): Promise<Proof | string>;
+  manageRequest(
+    requestId: number,
+    doctorId: number,
+    aproved: boolean,
+    file: Buffer | string,
+  ): Promise<null | string | Proof>;
+  getProof(proofId: number): Promise<Proof | string>;
 }

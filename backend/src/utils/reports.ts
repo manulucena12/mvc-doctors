@@ -3,9 +3,11 @@ import { reportsModel } from "../models/reports";
 import { ReportsUtils } from "../types";
 import PDFDocument from "pdfkit";
 import { recommender } from "./nutrients";
+import { proofModel } from "../models/proofs";
 
-const { bmiCalculator } = utils;
+const { bmiCalculator, getUserById } = utils;
 const { saveReport } = reportsModel;
+const { manageRequest, getProof } = proofModel;
 
 export const reportsUtils: ReportsUtils = {
   async createNutrition(
@@ -74,6 +76,38 @@ export const reportsUtils: ReportsUtils = {
         doc.fontSize(13).text(`-${l.name}, calories: ${l.calories}`);
       });
       doc.moveDown(2);
+      doc.end();
+    });
+  },
+  async createProof(proofId, doctorId, reason, date) {
+    const doc = new PDFDocument();
+    const proof = await getProof(proofId);
+    const doctor = await getUserById(doctorId);
+    const patient =
+      typeof proof === "string" ? null : await getUserById(proof.patient);
+    return new Promise((resolve) => {
+      if (!proof || !doctor || !patient) {
+        return resolve("Data not found");
+      }
+      const buffers: Buffer[] = [];
+      doc.on("data", buffers.push.bind(buffers));
+      doc.on("end", async () => {
+        const file = Buffer.concat(buffers);
+        const updatedProof = await manageRequest(proofId, doctorId, true, file);
+        return resolve(updatedProof);
+      });
+      doc.on("error", () => {
+        resolve("Internal server error");
+      });
+      doc
+        .fontSize(20)
+        .text(`Proof report for ${patient.name} by Dr. ${doctor.name}`);
+      doc.moveDown(1);
+      doc
+        .fontSize(18)
+        .text(
+          `Me, Dr. ${doctor.name}, I created this proof authorization for ${patient.name} attendance on ${date} due to ${reason}`,
+        );
       doc.end();
     });
   },

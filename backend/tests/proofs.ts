@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 export const testingProofs = () => {
   // let patientId: number;
   let doctorId: number;
-  // let proofId: number;
+  let proofId: number;
   let doctorToken: string;
   let patientToken: string;
   beforeAll(async () => {
@@ -46,7 +46,7 @@ export const testingProofs = () => {
         .set("token", patientToken)
         .expect(201)
         .then((response) => {
-          // proofId = response.body.id
+          proofId = response.body.id;
           expect(response.body.aproved).toBeNull();
         });
     });
@@ -70,24 +70,30 @@ export const testingProofs = () => {
           expect(response.body).toBe("Only patient can create requests");
         });
     });
-    /*it('Acepting a proof by being a doctor works properly', async () => {
-            await api
-            .put(`proofs/requests/${proofId}`)
-            .set('token', doctorToken)
-            .send({aproved: true, reason: 'Stomach pain', date: 'July 12, from 10am to 11am'})
+    it("Acepting a proof by being a doctor works properly", async () => {
+      await api
+        .put(`/proofs/requests/${proofId}`)
+        .set("token", doctorToken)
+        .send({
+          aproved: true,
+          reason: "Stomach pain",
+          date: "July 12, from 10am to 11am",
         })
-        it('Cancelling a proof by being a doctor works properly', async () => {
-            await api
-            .put(`/proofs/requests/${proofId}`)
-            .set('token', doctorToken)
-            .send({aproved: false})
-            .expect(204)
-        })
-        it('Creating a proof works properly', async () => {
-            await api
-            .post('/proofs')
-            .set('token', doctorToken)
-            .send({patient: patientId, reason: 'Stomach pain', date: 'July 12, from 10am to 11am'})
-        }) */
+        .expect(200);
+    });
+    it("Cancelling a proof by being a doctor works properly", async () => {
+      await api
+        .put(`/proofs/requests/${proofId}`)
+        .set("token", doctorToken)
+        .send({ aproved: false })
+        .expect(204);
+    });
+    /* it("Creating a proof works properly", async () => {
+      await api.post("/proofs").set("token", doctorToken).send({
+        patient: patientId,
+        reason: "Stomach pain",
+        date: "July 12, from 10am to 11am",
+      });
+    }); */
   });
 };
