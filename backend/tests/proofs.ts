@@ -3,7 +3,7 @@ import { api } from "./app.test";
 import bcrypt from "bcryptjs";
 
 export const testingProofs = () => {
-  // let patientId: number;
+  let patientId: number;
   let doctorId: number;
   let proofId: number;
   let doctorToken: string;
@@ -15,11 +15,11 @@ export const testingProofs = () => {
       [password],
     );
     doctorId = first[0].id;
-    await client.query(
+    const { rows: second } = await client.query(
       `INSERT INTO users (name, email, password, doctor) VALUES ('AdminTester9', 'admintester9@gmail.com', $1, false) RETURNING id`,
       [password],
     );
-    // patientId = second[0].id;
+    patientId = second[0].id;
     await api
       .post("/auth/signin")
       .send({
@@ -81,6 +81,16 @@ export const testingProofs = () => {
         })
         .expect(200);
     });
+    it("Retrieving a proof works properly", async () => {
+      await api
+        .get(`/proofs/${proofId}`)
+        .set("token", patientToken)
+        .expect(200)
+        .expect("Content-Type", /pdf/);
+    });
+    it("Retrieving a without being a doctor/patient of the proof causes 403", async () => {
+      await api.get(`/proofs/${proofId}`).expect(403);
+    });
     it("Cancelling a proof by being a doctor works properly", async () => {
       await api
         .put(`/proofs/requests/${proofId}`)
@@ -88,12 +98,19 @@ export const testingProofs = () => {
         .send({ aproved: false })
         .expect(204);
     });
-    /* it("Creating a proof works properly", async () => {
-      await api.post("/proofs").set("token", doctorToken).send({
-        patient: patientId,
-        reason: "Stomach pain",
-        date: "July 12, from 10am to 11am",
-      });
-    }); */
+    it("Creating a proof works properly", async () => {
+      await api
+        .post("/proofs")
+        .set("token", doctorToken)
+        .send({
+          patient: patientId,
+          reason: "Stomach pain",
+          date: "July 12, from 10am to 11am",
+        })
+        .expect(201)
+        .then((response) => {
+          expect(response.body.file).toBeDefined();
+        });
+    });
   });
 };

@@ -67,7 +67,7 @@ export const proofModel: ProofModel = {
       return "Internal server error";
     }
   },
-  async getProof(proofId) {
+  async getProof(proofId, userId) {
     try {
       const { rows: first } = await client.query(
         "SELECT * FROM proofs WHERE id = $1",
@@ -76,7 +76,29 @@ export const proofModel: ProofModel = {
       if (first.length === 0) {
         return "Proof not found";
       }
+      if (userId !== first[0].doctor && userId !== first[0].patient) {
+        return "You cannot access to this proof";
+      }
       return first[0];
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
+  async newProof(patientId, doctorId, file) {
+    try {
+      const { rows: users } = await client.query(
+        "SELECT * FROM users WHERE id = $1 OR id = $2",
+        [patientId, doctorId],
+      );
+      if (users.length !== 2) {
+        return "Some or all the users are missing";
+      }
+      const { rows } = await client.query(
+        "INSERT INTO proofs (patient, doctor, file, aproved) VALUES ($1, $2, $3, true) RETURNING *",
+        [patientId, doctorId, file],
+      );
+      return rows[0];
     } catch (error) {
       console.log(error);
       return "Internal server error";

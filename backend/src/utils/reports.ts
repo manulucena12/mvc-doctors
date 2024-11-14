@@ -4,10 +4,11 @@ import { ReportsUtils } from "../types";
 import PDFDocument from "pdfkit";
 import { recommender } from "./nutrients";
 import { proofModel } from "../models/proofs";
+import { sendEmail } from "../mailer";
 
 const { bmiCalculator, getUserById } = utils;
 const { saveReport } = reportsModel;
-const { manageRequest, getProof } = proofModel;
+const { manageRequest, getProof, newProof } = proofModel;
 
 export const reportsUtils: ReportsUtils = {
   async createNutrition(
@@ -79,10 +80,10 @@ export const reportsUtils: ReportsUtils = {
       doc.end();
     });
   },
-  async createProof(proofId, doctorId, reason, date) {
+  async updateProof(proofId, doctorId, reason, date) {
     const doc = new PDFDocument();
-    const proof = await getProof(proofId);
     const doctor = await getUserById(doctorId);
+    const proof = await getProof(proofId, doctorId);
     const patient =
       typeof proof === "string" ? null : await getUserById(proof.patient);
     return new Promise((resolve) => {
@@ -95,6 +96,43 @@ export const reportsUtils: ReportsUtils = {
         const file = Buffer.concat(buffers);
         const updatedProof = await manageRequest(proofId, doctorId, true, file);
         return resolve(updatedProof);
+      });
+      doc.on("error", () => {
+        resolve("Internal server error");
+      });
+      doc
+        .fontSize(20)
+        .text(`Proof report for ${patient.name} by Dr. ${doctor.name}`);
+      doc.moveDown(1);
+      doc
+        .fontSize(18)
+        .text(
+          `Me, Dr. ${doctor.name}, I created this proof authorization for ${patient.name} attendance on ${date} due to ${reason}`,
+        );
+      doc.end();
+    });
+  },
+  async createProof(patientId, doctorId, reason, date) {
+    const doc = new PDFDocument();
+    const doctor = await getUserById(doctorId);
+    const patient = await getUserById(patientId);
+    return new Promise((resolve) => {
+      if (!doctor || !patient) {
+        return resolve("Data not found");
+      }
+      const buffers: Buffer[] = [];
+      doc.on("data", buffers.push.bind(buffers));
+      doc.on("end", async () => {
+        const file = Buffer.concat(buffers);
+        const proof = await newProof(patientId, doctorId, file);
+        if (typeof proof !== "string") {
+          sendEmail(
+            "New proof for you",
+            patient.email,
+            `Hello ${patient.name}, we communicate you that Dr. ${doctor.name} has recently created a new proof for you, if you want you to see/download it go to the app -> 'My proofs'`,
+          );
+        }
+        return resolve(proof);
       });
       doc.on("error", () => {
         resolve("Internal server error");

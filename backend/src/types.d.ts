@@ -98,6 +98,7 @@ export interface Proof {
   patient: number;
   doctor: number;
   aproved?: boolean;
+  file?: Buffer;
 }
 
 export interface AuthController {
@@ -219,12 +220,18 @@ export interface ReportsUtils {
     protein: number,
     goal: string,
   ): Promise<Report>;
-  createProof(
+  updateProof(
     proofId: number,
     doctorId: number,
     reason: string,
     date: string,
   ): Promise<Proof | null | string>;
+  createProof(
+    patientId: number,
+    doctorId: number,
+    reason: string,
+    date: string,
+  ): Promise<Proof | string>;
 }
 
 export interface ChatsController {
@@ -246,6 +253,8 @@ export interface ChatsModel {
 export interface ProofController {
   requestProof(req: Request, res: Response): Promise<Response>;
   manageRequest(req: Request, res: Response): Promise<Response>;
+  getProof(req: Request, res: Response): Promise<Response>;
+  createProof(req: Request, res: Response): Promise<Response>;
 }
 
 export interface ProofModel {
@@ -256,5 +265,10 @@ export interface ProofModel {
     aproved: boolean,
     file: Buffer | string,
   ): Promise<null | string | Proof>;
-  getProof(proofId: number): Promise<Proof | string>;
+  getProof(proofId: number, userId: number): Promise<Proof | string>;
+  newProof(
+    patientId: number,
+    doctorId: number,
+    file: Buffer,
+  ): Promise<Proof | string>;
 }

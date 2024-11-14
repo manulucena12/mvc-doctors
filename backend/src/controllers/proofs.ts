@@ -5,8 +5,8 @@ import { utils } from "../utils";
 import { reportsUtils } from "../utils/reports";
 
 const { getUserById } = utils;
-const { newRequest, manageRequest } = proofModel;
-const { createProof } = reportsUtils;
+const { newRequest, manageRequest, getProof } = proofModel;
+const { updateProof, createProof } = reportsUtils;
 
 export const proofController: ProofController = {
   async requestProof(req, res) {
@@ -75,7 +75,7 @@ export const proofController: ProofController = {
     if (!reason || !date) {
       return res.status(400).json("Missing parameters reason and date");
     }
-    const response = await createProof(
+    const response = await updateProof(
       Number(proofId),
       req.doctorId,
       reason,
@@ -92,5 +92,53 @@ export const proofController: ProofController = {
       return res.status(status).json(response);
     }
     return res.status(200).json(response);
+  },
+  async getProof(req, res) {
+    const { proofId } = req.params;
+    if (!proofId || isNaN(Number(proofId))) {
+      return res.status(400).json("Missing data or invalid type");
+    }
+    if (!req.doctorId && !req.userId) {
+      return res.status(403).json("Unauthorized");
+    }
+    const userId = req.doctorId ? req.doctorId : req.userId ? req.userId : 0;
+    const response = await getProof(Number(proofId), userId);
+    if (response === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof response === "string") {
+      const status = response === "You cannot access to this proof" ? 403 : 400;
+      return res.status(status).json(response);
+    }
+    if (response.aproved === null) {
+      return res
+        .status(400)
+        .json(
+          "This proof is pending to be accepted, you still have no access to it",
+        );
+    }
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="proof_${response.id}.pdf"`,
+    );
+    return res.status(200).send(response.file);
+  },
+  async createProof(req, res) {
+    const { reason, date, patient } = req.body;
+    if (!reason || !date || !patient || typeof patient !== "number") {
+      return res.status(400).json("Missing data or invalid type");
+    }
+    if (!req.doctorId) {
+      return res.status(403).json("Unauthorized");
+    }
+    const proof = await createProof(patient, req.doctorId, reason, date);
+    if (proof === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof proof === "string") {
+      return res.status(400).json(proof);
+    }
+    return res.status(201).json(proof);
   },
 };
