@@ -104,4 +104,23 @@ export const proofModel: ProofModel = {
       return "Internal server error";
     }
   },
+  async deleteProof(proofId, doctorId) {
+    try {
+      const { rows } = await client.query(
+        "SELECT doctor FROM proofs WHERE id = $1",
+        [proofId],
+      );
+      if (rows.length === 0) {
+        return "Proof not found";
+      }
+      if (rows[0].doctor !== doctorId) {
+        return "You cannot delete a proof that is not yours";
+      }
+      await client.query("DELETE FROM proofs WHERE id = $1", [proofId]);
+      return null;
+    } catch (error) {
+      console.log(error);
+      return "Internal server error";
+    }
+  },
 };

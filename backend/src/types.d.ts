@@ -255,6 +255,7 @@ export interface ProofController {
   manageRequest(req: Request, res: Response): Promise<Response>;
   getProof(req: Request, res: Response): Promise<Response>;
   createProof(req: Request, res: Response): Promise<Response>;
+  deleteProof(req: Request, res: Response): Promise<Response>;
 }
 
 export interface ProofModel {
@@ -271,4 +272,5 @@ export interface ProofModel {
     doctorId: number,
     file: Buffer,
   ): Promise<Proof | string>;
+  deleteProof(proofId: number, doctorId: number): Promise<null | string>;
 }

@@ -17,6 +17,8 @@ tags:
     description: This route manages reports created by doctors for their patients.
   - name: Chats Route
     description: This route allows doctors and patient to send menssages each other.
+  - name: Proofs route
+    description: This route allows patient to create proofs request and doctor to manage them
 paths:
   /auth/signup:
     post:
@@ -651,6 +653,196 @@ paths:
           description: Unauthorized access to chat.
         '500':
           description: Internal server error.
+  /proofs/requests/{doctorId}:
+    post:
+      tags:
+        - Proofs route
+      summary: Request proof from a doctor
+      description: Allows a patient to request a work absence proof from a specific doctor.
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - name: doctorId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the doctor to whom the proof request is sent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for the absence proof request
+      responses:
+        '201':
+          description: Proof request successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: ID of the created proof request
+        '400':
+          description: Missing or invalid data
+        '403':
+          description: Unauthorized - only patients can create proof requests
+        '500':
+          description: Internal server error
+
+  /proofs/requests/{proofId}:
+    put:
+      tags:
+        - Proofs route
+      summary: Approve or deny a proof request
+      description: Allows a doctor to approve or deny a patient's proof request.
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+        - name: proofId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the proof request to be managed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                aproved:
+                  type: boolean
+                  description: Approval status of the proof request
+                reason:
+                  type: string
+                  description: Reason for the proof if approved (required if aproved is true)
+                date:
+                  type: string
+                  format: date
+                  description: Date of the proof if approved (required if aproved is true)
+      responses:
+        '200':
+          description: Proof request updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: ID of the updated proof request
+        '204':
+          description: Proof request denied without any issues
+        '400':
+          description: Missing or invalid data
+        '403':
+          description: Unauthorized - doctor can only manage own requests
+        '500':
+          description: Internal server error
+
+  /proofs/{proofId}:
+    get:
+      tags:
+        - Proofs route
+      summary: Get a proof document
+      operationId: getProofDocument
+      description: Allows patients or doctors to retrieve a specific proof document if approved.
+      parameters:
+        - $ref: '#/components/parameters/token'
+        - name: proofId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the proof to retrieve
+      responses:
+        '200':
+          description: Proof document retrieved successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Proof is pending approval, access denied
+        '403':
+          description: Unauthorized - only relevant doctor or patient can access
+        '500':
+          description: Internal server error
+
+  /proofs:
+    post:
+      tags:
+        - Proofs route
+      summary: Create a proof directly by doctor
+      description: Allows a doctor to create a proof directly for a patient.
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for the absence
+                date:
+                  type: string
+                  format: date
+                  description: Date of the proof
+                patient:
+                  type: integer
+                  description: ID of the patient for whom the proof is created
+      responses:
+        '201':
+          description: Proof created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: ID of the created proof
+        '400':
+          description: Missing or invalid data
+        '403':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /proofs/{proofId}/delete:
+    delete:
+      tags:
+        - Proofs route
+      summary: Delete a proof
+      operationId: deleteProofDocument
+      description: Allows a doctor to delete a specific proof document the final '/delete' is added to avoid swagger error.
+      parameters:
+        - $ref: '#/components/parameters/doctorToken'
+        - name: proofId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the proof to delete
+      responses:
+        '204':
+          description: Proof deleted successfully
+        '400':
+          description: Missing or invalid data
+        '403':
+          description: Unauthorized - doctor can only delete own proofs
+        '500':
+          description: Internal server error        
 components:
   parameters:
     token:

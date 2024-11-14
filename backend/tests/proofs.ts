@@ -8,6 +8,7 @@ export const testingProofs = () => {
   let proofId: number;
   let doctorToken: string;
   let patientToken: string;
+  let secondProofId: number;
   beforeAll(async () => {
     const password = await bcrypt.hash("passwordadmintester", 10);
     const { rows: first } = await client.query(
@@ -111,6 +112,20 @@ export const testingProofs = () => {
         .then((response) => {
           expect(response.body.file).toBeDefined();
         });
+    });
+    it("Deleting a proof without being the doctor who owns it causes 403", async () => {
+      const { rows } = await client.query(
+        "INSERT INTO proofs (aproved, doctor, patient) VALUES (true, $1, $2) RETURNING id",
+        [doctorId, patientId],
+      );
+      secondProofId = rows[0].id;
+      await api.delete(`/proofs/${secondProofId}`).expect(403);
+    });
+    it("Deleting a proof works properly", async () => {
+      await api
+        .delete(`/proofs/${secondProofId}`)
+        .set("token", doctorToken)
+        .expect(204);
     });
   });
 };

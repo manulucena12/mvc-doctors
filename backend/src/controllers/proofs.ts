@@ -5,7 +5,7 @@ import { utils } from "../utils";
 import { reportsUtils } from "../utils/reports";
 
 const { getUserById } = utils;
-const { newRequest, manageRequest, getProof } = proofModel;
+const { newRequest, manageRequest, getProof, deleteProof } = proofModel;
 const { updateProof, createProof } = reportsUtils;
 
 export const proofController: ProofController = {
@@ -140,5 +140,24 @@ export const proofController: ProofController = {
       return res.status(400).json(proof);
     }
     return res.status(201).json(proof);
+  },
+  async deleteProof(req, res) {
+    const { proofId } = req.params;
+    if (!proofId || isNaN(Number(proofId))) {
+      return res.status(400).json("Missing data or invalid type");
+    }
+    if (!req.doctorId) {
+      return res.status(403).json("Unauthorized");
+    }
+    const response = await deleteProof(Number(proofId), req.doctorId);
+    if (response === "Internal server error") {
+      return res.status(500).json("Internal server error");
+    }
+    if (typeof response === "string") {
+      const status =
+        response === "You cannot delete a proof that is not yours" ? 403 : 400;
+      return res.status(status).json(response);
+    }
+    return res.status(204).end();
   },
 };
